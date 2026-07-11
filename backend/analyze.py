@@ -13,8 +13,16 @@ def _complete_with(provider: str, base_url: str, model: str, prompt: str, max_to
     import config
     from openai import OpenAI
     client = OpenAI(base_url=base_url, api_key=config.OPENAI_COMPAT_KEY or "ollama")
+    # Gemini 3.x "thinking" models spend a large, hidden slice of the token
+    # budget on reasoning; without capping it the visible completion gets
+    # truncated (finish_reason=length) and JSON parsing fails. reasoning_effort
+    # is forwarded via extra_body so non-reasoning backends simply ignore it.
+    kwargs = {}
+    if provider == "openai_compatible":
+        kwargs["extra_body"] = {"reasoning_effort": "high"}
     resp = client.chat.completions.create(model=model, max_tokens=max_tokens,
-                                          messages=[{"role": "user", "content": prompt}])
+                                          messages=[{"role": "user", "content": prompt}],
+                                          **kwargs)
     return resp.choices[0].message.content or ""
 
 def complete(prompt: str, max_tokens: int = 3000, task: str = "default") -> str:
@@ -39,9 +47,12 @@ def rank_index(feed_key: str, raw_items: list[dict]) -> list[dict]:
     prompt = S.render(S.get_prompt("rank"), feed_context=S.FEED_CONTEXT[feed_key],
                       corpus=corpus, top_n=dials["top_n_index"],
                       severity_hint=S.SEVERITY_HINT[feed_key])
-    text = complete(prompt, max_tokens=2000)
+    text = complete(prompt, max_tokens=8000)
     clean = text.replace("```json", "").replace("```", "").strip()
-    ranked = json.loads(clean[clean.find("["):clean.rfind("]") + 1])
+    slice_ = clean[clean.find("["):clean.rfind("]") + 1]
+    if not slice_:
+        raise ValueError(f"rank_index: model returned no JSON array for feed '{feed_key}': {text[:200]!r}")
+    ranked = json.loads(slice_)
     for r in ranked:
         r["source_urls"] = [raw_items[i]["url"] for i in r.get("source_indices", [])
                             if isinstance(i, int) and i < len(raw_items)][:4]
@@ -50,10 +61,10 @@ def rank_index(feed_key: str, raw_items: list[dict]) -> list[dict]:
 def deep_dive(feed_key: str, topic: str, source_text: str) -> str:
     cap = S.get_dials()["max_source_chars"]
     prompt = S.render(S.get_prompt(f"dive_{feed_key}"), topic=topic, source=source_text[:cap])
-    return complete(prompt, max_tokens=3500)
+    return complete(prompt, max_tokens=8000)
 
 def pov(feed_key: str, topic: str, source_text: str) -> str:
     cap = S.get_dials()["max_source_chars"]
     prompt = S.render(S.get_prompt("pov"), topic=topic, source=source_text[:cap],
                       angle=S.POV_ANGLE[feed_key])
-    return complete(prompt, max_tokens=3500, task="pov")
+    return complete(prompt, max_tokens=8000, task="pov")
