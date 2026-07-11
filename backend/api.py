@@ -30,6 +30,15 @@ def feed_index(feed: str, x_api_token: str | None = Header(None)):
     return data
 
 
+@app.get("/api/feeds/{feed}/wire")
+def feed_wire(feed: str, x_api_token: str | None = Header(None)):
+    """Live wire — latest raw headlines for the feed (no AI, cached ~5 min)."""
+    auth(x_api_token)
+    if feed not in ("breach", "tools", "ai"):
+        raise HTTPException(404, "Unknown feed")
+    return ingest.wire(feed)
+
+
 @app.get("/api/briefings/{bid}")
 def briefing(bid: int, x_api_token: str | None = Header(None)):
     auth(x_api_token)

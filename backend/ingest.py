@@ -3,6 +3,7 @@
 Each function returns a list of dicts:
   {"title", "url", "published", "source", "summary"}
 """
+import calendar
 import time
 import requests
 import feedparser
@@ -115,6 +116,76 @@ def fetch_article_text(url: str, max_chars: int) -> str:
     except Exception as exc:
         print(f"[ingest] article fetch failed {url}: {exc}")
         return ""
+
+
+def _entry_image(e) -> str:
+    """Best-effort thumbnail from an RSS entry (media/enclosure). May be empty."""
+    for key in ("media_thumbnail", "media_content"):
+        v = e.get(key)
+        if v and isinstance(v, list) and v[0].get("url"):
+            return v[0]["url"]
+    for l in e.get("links", []):
+        if l.get("rel") == "enclosure" and str(l.get("type", "")).startswith("image"):
+            return l.get("href", "")
+    return ""
+
+
+_wire_cache: dict[str, tuple[float, dict]] = {}
+_WIRE_TTL = 300  # seconds — the wire refreshes a few times an hour, not per request
+
+
+def wire(feed_key: str, limit: int = 12) -> dict:
+    """Latest RAW headlines for a feed — no AI, real sources, newest first.
+
+    Returns {generated_at, sources:[names], items:[{title,url,source,ts,exploited,image}]}.
+    Cached per feed for _WIRE_TTL so page loads don't refetch every RSS source.
+    """
+    now = time.time()
+    hit = _wire_cache.get(feed_key)
+    if hit and now - hit[0] < _WIRE_TTL:
+        return hit[1]
+
+    items, sources = [], []
+    for url in rss_sources().get(feed_key, []):
+        try:
+            parsed = feedparser.parse(url)
+            sname = parsed.feed.get("title", url) or url
+            sources.append(sname)
+            for e in parsed.entries[:12]:
+                pp = e.get("published_parsed") or e.get("updated_parsed")
+                items.append({
+                    "title": (e.get("title", "") or "").strip(),
+                    "url": e.get("link", ""),
+                    "source": sname,
+                    "ts": calendar.timegm(pp) if pp else 0,
+                    "exploited": False,
+                    "image": _entry_image(e),
+                })
+        except Exception as exc:  # a dead feed must never break the wire
+            print(f"[wire] RSS failed {url}: {exc}")
+        time.sleep(0.2)
+
+    # Breach wire folds in CISA KEV additions — the strongest "exploited now" signal.
+    if feed_key == "breach":
+        for v in fetch_cisa_kev(8):
+            ts = 0
+            try:
+                ts = calendar.timegm(time.strptime(v["published"], "%Y-%m-%d"))
+            except Exception:
+                pass
+            items.append({"title": v["title"], "url": v["url"], "source": "CISA KEV",
+                          "ts": ts, "exploited": True, "image": ""})
+        sources.append("CISA KEV")
+
+    seen, out = set(), []
+    for it in sorted(items, key=lambda x: x["ts"], reverse=True):
+        k = it["title"].lower()[:80]
+        if k and k not in seen:
+            seen.add(k)
+            out.append(it)
+    data = {"generated_at": int(now), "sources": sorted(set(sources)), "items": out[:limit]}
+    _wire_cache[feed_key] = (now, data)
+    return data
 
 
 def ingest(feed_key: str) -> list[dict]:

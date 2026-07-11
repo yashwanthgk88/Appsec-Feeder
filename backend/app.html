@@ -4,16 +4,16 @@
 :root{--ink:#141414;--paper:#F1F2EF;--yellow:#FFE600;--gray:#5A5D58;--line:#D9DBD4;--soft:#E7E8E2;--card:#fff;--red:#B3261E}
 *{box-sizing:border-box}body{margin:0;background:var(--paper);font-family:-apple-system,Segoe UI,Roboto,sans-serif;color:var(--ink)}
 .mono{font-family:ui-monospace,Menlo,Consolas,monospace}
-header{background:var(--ink)}.hwrap{max-width:920px;margin:0 auto;padding:18px 20px 0;display:flex;justify-content:space-between;align-items:flex-end;flex-wrap:wrap;gap:10px}
+header{background:var(--ink)}.hwrap{max-width:1040px;margin:0 auto;padding:18px 20px 0;display:flex;justify-content:space-between;align-items:flex-end;flex-wrap:wrap;gap:10px}
 .tag{color:var(--yellow);font-size:11px;letter-spacing:.2em}h1{color:#fff;margin:2px 0 0;font-size:30px}h1 span{color:var(--yellow)}
 .brand{display:flex;align-items:center;gap:12px}.mark{width:44px;height:44px;flex-shrink:0}
 .mark .sweep{transform-origin:24px 24px;animation:radar 4s linear infinite}@keyframes radar{to{transform:rotate(360deg)}}
 @media (prefers-reduced-motion:reduce){.mark .sweep{animation:none}}
 .sub{color:#9A9C96;font-size:11px;letter-spacing:.06em}
-.tabs{max-width:920px;margin:0 auto;padding:8px 20px 0;display:flex;flex-wrap:wrap}
+.tabs{max-width:1040px;margin:0 auto;padding:8px 20px 0;display:flex;flex-wrap:wrap}
 .tabs button{border:none;background:transparent;color:#B8BAB4;padding:12px 14px;font-size:11px;font-weight:700;letter-spacing:.1em;cursor:pointer;border-top:3px solid transparent}
 .tabs button.on{background:var(--paper);color:var(--ink);border-top-color:var(--yellow)}
-.wrap{max-width:920px;margin:0 auto;padding:22px 20px 60px}
+.wrap{max-width:1040px;margin:0 auto;padding:22px 20px 60px}
 .blurb{color:var(--gray);font-size:13px;max-width:640px;margin:4px 0 14px}
 .bar{display:flex;gap:8px;max-width:640px;margin-bottom:20px}
 input[type=text],input[type=password]{flex:1;padding:9px;border:1px solid var(--line);background:var(--card);font-size:13px}
@@ -45,8 +45,50 @@ button:disabled{opacity:.4;cursor:not-allowed;box-shadow:none}
 .load::before{content:"";display:inline-block;width:11px;height:11px;background:var(--yellow);border:2px solid var(--ink);margin-right:10px;animation:p 1s infinite}
 @keyframes p{50%{opacity:.3}}
 .err{color:var(--red);padding:14px 18px;font-size:13px}
-footer{max-width:920px;margin:0 auto;padding:0 20px 30px;font-size:10px;color:#9A9C96;letter-spacing:.06em}
+footer{max-width:1040px;margin:0 auto;padding:0 20px 30px;font-size:10px;color:#9A9C96;letter-spacing:.06em}
 #gate{max-width:420px;margin:60px auto;background:var(--card);border:1px solid var(--line);border-left:6px solid var(--yellow);padding:20px}
+/* --- live wire + latest rail --- */
+.ticker{background:var(--ink);color:#fff;overflow:hidden;white-space:nowrap;display:flex;align-items:stretch;margin:0 0 6px}
+.ticker .lbl{background:var(--red);color:#fff;font-size:10px;font-weight:800;letter-spacing:.12em;display:flex;align-items:center;gap:6px;padding:0 12px;flex-shrink:0}
+.ticker .lbl .d{width:7px;height:7px;border-radius:50%;background:#fff;animation:blink 1.4s ease-in-out infinite}
+@keyframes blink{50%{opacity:.25}}
+.ticker .win{overflow:hidden;flex:1}
+.ticker .track{display:inline-block;padding:8px 0;animation:scroll 46s linear infinite}
+@keyframes scroll{from{transform:translateX(0)}to{transform:translateX(-50%)}}
+.ticker .it{padding:0 20px;font-size:11.5px}
+.ticker .it .s{color:var(--yellow);font-weight:700;font-family:ui-monospace,monospace;font-size:10px;margin-right:7px}
+.ticker .it .ex{color:var(--red);background:#fff;font-weight:800;font-size:9px;padding:0 4px;margin-right:6px}
+.srcline{font-size:9.5px;color:var(--gray);letter-spacing:.05em;margin:0 0 16px}
+.srcline b{color:var(--ink);font-weight:700}
+.layout{display:grid;grid-template-columns:1fr 300px;gap:22px;align-items:start}
+.rail{position:sticky;top:14px}
+.railhead{display:flex;align-items:center;gap:8px;background:var(--ink);color:#fff;padding:8px 12px}
+.railhead .live{display:flex;align-items:center;gap:6px;font-size:10.5px;font-weight:800;letter-spacing:.12em;color:var(--yellow)}
+.railhead .live .d{width:7px;height:7px;border-radius:50%;background:var(--red);animation:ping 1.6s ease-out infinite}
+@keyframes ping{0%{box-shadow:0 0 0 0 rgba(179,38,30,.55)}70%{box-shadow:0 0 0 6px rgba(179,38,30,0)}100%{box-shadow:0 0 0 0 rgba(179,38,30,0)}}
+.railhead .sw{margin-left:auto;display:flex}
+.railhead .sw button{border:1px solid #333;background:transparent;color:#B8BAB4;font-size:8.5px;font-weight:800;letter-spacing:.06em;padding:3px 7px;cursor:pointer;font-family:ui-monospace,monospace}
+.railhead .sw button.on{background:var(--yellow);color:var(--ink);border-color:var(--yellow)}
+.railbox{background:var(--card);border:1px solid var(--line);border-top:none}
+.railfoot{font-size:9px;color:var(--gray);letter-spacing:.03em;padding:9px 12px;border-top:1px dashed var(--line);display:flex;justify-content:space-between;align-items:center;gap:8px}
+.railfoot .rl{background:none;border:none;color:var(--ink);font-size:12px;cursor:pointer;flex-shrink:0}
+.witem{display:flex;gap:10px;padding:10px 12px;border-top:1px solid var(--soft);cursor:pointer;align-items:flex-start;text-decoration:none;color:inherit}
+.witem:first-child{border-top:none}
+.witem:hover{background:#FAFAF7}
+.wthumb{width:56px;height:42px;flex-shrink:0;position:relative;overflow:hidden;background:linear-gradient(135deg,#2b2b2b,#555)}
+.wthumb img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;display:block}
+.wthumb .m{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:15px;font-weight:800;color:#fff;opacity:.55;font-family:ui-monospace,monospace}
+.wtext{min-width:0}.wtext .t{font-size:11.5px;font-weight:600;line-height:1.3;color:var(--ink)}
+.wtext .m2{font-size:9px;color:var(--gray);letter-spacing:.03em;margin-top:4px}
+.wtext .ex{color:var(--red);font-weight:800}
+.wtext .new{background:var(--yellow);color:var(--ink);font-weight:800;padding:0 4px}
+.railbox.cards .witem{flex-direction:column;gap:8px;padding:0 0 12px}
+.railbox.cards .witem+.witem{border-top:1px solid var(--soft);padding-top:12px}
+.railbox.cards .wthumb{width:100%;height:116px}
+.railbox.cards .wthumb .m{font-size:34px}
+.railbox.cards .wtext{padding:0 12px}
+@media (prefers-reduced-motion:reduce){.ticker .track,.ticker .lbl .d,.railhead .live .d{animation:none}}
+@media (max-width:820px){.layout{grid-template-columns:1fr}.rail{position:static;order:-1;margin-bottom:20px}}
 </style></head><body>
 <header><div class="hwrap"><div class="brand">
 <svg class="mark" viewBox="0 0 48 48" aria-hidden="true" fill="none" stroke="#FFE600" stroke-linecap="round">
@@ -65,18 +107,29 @@ footer{max-width:920px;margin:0 auto;padding:0 20px 30px;font-size:10px;color:#9
 
 <div class="wrap" id="main" style="display:none">
 <p class="blurb" id="blurb"></p>
+<div class="ticker" id="ticker" style="display:none"><span class="lbl mono"><span class="d"></span>LIVE WIRE</span><span class="win"><span class="track mono" id="track"></span></span></div>
+<div class="srcline mono" id="wireSrc"></div>
+<div class="layout">
+<main>
 <div class="bar"><input type="text" id="topic" placeholder="Research a custom topic…"><button class="btn" onclick="research('dive')">DEEP-DIVE</button><button class="btn" onclick="research('pov')">POV</button></div>
 <div class="idx"><div class="strip mono"><span id="idxTitle">TOP 10 // INDEX</span><a href="#" onclick="loadIndex();return false">↻ RELOAD</a></div><div id="idxBody"><div class="load mono">LOADING INDEX</div></div></div>
-<div id="briefs"></div></div>
+<div id="briefs"></div>
+</main>
+<aside class="rail" id="rail" style="display:none">
+<div class="railhead"><span class="live mono"><span class="d"></span>LATEST</span><span class="sw"><button data-wv="list" class="on" type="button">LIST</button><button data-wv="cards" type="button">CARDS</button></span></div>
+<div class="railbox" id="wireBox"></div>
+<div class="railfoot mono"><span id="railSrc">SOURCE</span><button class="rl" type="button" onclick="loadWire()" title="Refresh">↻</button></div>
+</aside>
+</div></div>
 <footer class="mono">GENERATED ONCE DAILY BY THE PIPELINE · SERVED FROM CACHE · AI-RESEARCHED FROM PUBLIC SOURCES AND MAY CONTAIN ERRORS</footer>
 <script>
 const BLURBS={breach:"The top 10 recent AppSec-relevant breaches. Pick one for the full autopsy — or a partner-grade POV.",tools:"The top 10 new or rising AppSec tools, with honest evaluations and incumbent comparisons.",ai:"The top 10 AI × AppSec developments, separated into signal and hype."};
 let FEED="breach",TOKEN=sessionStorage.getItem("feeder_token")||"";
 const $=id=>document.getElementById(id);
 const api=(p,o={})=>fetch(p,{...o,headers:{"Content-Type":"application/json","x-api-token":TOKEN,...(o.headers||{})}}).then(r=>{if(!r.ok)throw new Error(r.status);return r.json()});
-function unlock(){TOKEN=$('tok').value;api(`/api/feeds/breach/index`).catch(e=>{if(String(e.message)==="401"){sessionStorage.removeItem("feeder_token");alert("Invalid token");throw e}}).finally(()=>{});sessionStorage.setItem("feeder_token",TOKEN);$('gate').style.display='none';$('main').style.display='block';loadIndex()}
-if(TOKEN){$('gate').style.display='none';$('main').style.display='block';window.addEventListener('DOMContentLoaded',loadIndex)}
-document.querySelectorAll('.tabs button[data-f]').forEach(b=>b.onclick=()=>{document.querySelectorAll('.tabs button[data-f]').forEach(x=>x.classList.remove('on'));b.classList.add('on');FEED=b.dataset.f;$('briefs').innerHTML='';loadIndex()});
+function unlock(){TOKEN=$('tok').value;api(`/api/feeds/breach/index`).catch(e=>{if(String(e.message)==="401"){sessionStorage.removeItem("feeder_token");alert("Invalid token");throw e}}).finally(()=>{});sessionStorage.setItem("feeder_token",TOKEN);$('gate').style.display='none';$('main').style.display='block';loadIndex();loadWire();startWireTimers()}
+if(TOKEN){$('gate').style.display='none';$('main').style.display='block';window.addEventListener('DOMContentLoaded',()=>{loadIndex();loadWire();startWireTimers()})}
+document.querySelectorAll('.tabs button[data-f]').forEach(b=>b.onclick=()=>{document.querySelectorAll('.tabs button[data-f]').forEach(x=>x.classList.remove('on'));b.classList.add('on');FEED=b.dataset.f;$('briefs').innerHTML='';loadIndex();loadWire()});
 function md(t){t=t.replace(/&/g,'&amp;').replace(/</g,'&lt;');const L=t.split('\n');let h='',i=0;
  const inline=s=>s.replace(/\*\*([^*]+)\*\*/g,'<b>$1</b>').replace(/`([^`]+)`/g,'<code>$1</code>').replace(/\[([^\]]+)\]\((https?:[^)\s]+)\)/g,'<a href="$2" target="_blank" rel="noreferrer">$1</a>');
  while(i<L.length){const l=L[i];
@@ -116,4 +169,35 @@ async function openBriefing(id,kind,title){
  catch(e){body.innerHTML=`<div class="err">Failed (${e.message==='429'?'daily on-demand limit reached':e.message}).</div>`}
  finally{setBusy(false)}}
 async function research(kind){if(BUSY)return;const t=$('topic').value.trim();if(!t)return;$('topic').value='';openBriefing(null,kind,t)}
+
+/* ---- live wire + latest rail (real RSS/KEV per feed, no AI) ---- */
+let WIRE_DATA=null,WIRE_VIEW='list',WIRE_TIMERS=false;
+const esc=s=>(s==null?'':String(s)).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+const mono2=s=>((s||'').split(/[^A-Za-z]/).filter(Boolean).slice(0,2).map(w=>w[0]).join('').toUpperCase())||'•';
+function relTime(ts){if(!ts)return '';let m=Math.floor((Date.now()/1000-ts)/60);if(m<0)m=0;return m<1?'just now':m<60?m+'m ago':m<1440?Math.floor(m/60)+'h ago':Math.floor(m/1440)+'d ago';}
+function wireItemHTML(w,i){
+ const img=w.image?`<img src="${esc(w.image)}" alt="" loading="lazy" referrerpolicy="no-referrer" onerror="this.remove()">`:'';
+ const tag=w.exploited?'<span class="ex">⚡ EXPLOITED</span> ':(i<2?'<span class="new">NEW</span> ':'');
+ const t=w.ts?' · '+relTime(w.ts):'';
+ return `<a class="witem" href="${esc(w.url)}" target="_blank" rel="noreferrer">
+  <div class="wthumb"><span class="m">${esc(mono2(w.source))}</span>${img}</div>
+  <div class="wtext"><div class="t">${esc(w.title)}</div>
+   <div class="m2 mono">${tag}<b style="color:var(--ink)">${esc(w.source)}</b>${t}</div></div></a>`;}
+function tickerItemHTML(w){return `<span class="it">${w.exploited?'<span class="ex">EXPLOITED</span>':''}<span class="s">${esc(w.source)}</span>${esc(w.title)}</span>`;}
+function renderWire(){const d=WIRE_DATA;
+ if(!d||!d.items||!d.items.length){$('ticker').style.display='none';$('rail').style.display='none';return;}
+ $('ticker').style.display='flex';$('rail').style.display='block';
+ const run=d.items.map(tickerItemHTML).join('');$('track').innerHTML=run+run;
+ $('wireBox').className='railbox'+(WIRE_VIEW==='cards'?' cards':'');
+ $('wireBox').innerHTML=d.items.map(wireItemHTML).join('');
+ const src=(d.sources||[]).join(' · ');
+ $('wireSrc').innerHTML='<b>LIVE WIRE · SOURCES:</b> '+esc(src);
+ $('railSrc').textContent='SOURCE · '+src;}
+async function loadWire(){try{WIRE_DATA=await api(`/api/feeds/${FEED}/wire`);renderWire();}
+ catch(e){$('ticker').style.display='none';$('rail').style.display='none';}}
+document.querySelectorAll('.railhead .sw button').forEach(b=>b.onclick=()=>{
+ document.querySelectorAll('.railhead .sw button').forEach(x=>x.classList.remove('on'));
+ b.classList.add('on');WIRE_VIEW=b.dataset.wv;renderWire();});
+function startWireTimers(){if(WIRE_TIMERS)return;WIRE_TIMERS=true;
+ setInterval(loadWire,300000);setInterval(()=>{if(WIRE_DATA)renderWire();},60000);}
 </script></body></html>
