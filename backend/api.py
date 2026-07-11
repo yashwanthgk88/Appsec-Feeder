@@ -152,13 +152,39 @@ def admin_test_whatsapp(x_admin_token: str | None = Header(None)):
                                  "tools": [{"title": "-"}], "ai": [{"title": "-"}]})
     return {"ok": True}
 
+_pipeline_state = {"running": False, "started_at": None, "finished_at": None, "error": None}
+
+
+def _run_pipeline_bg():
+    import pipeline
+    _pipeline_state.update(running=True,
+                           started_at=datetime.datetime.now(datetime.timezone.utc).isoformat(),
+                           finished_at=None, error=None)
+    try:
+        pipeline.run()
+    except Exception as exc:  # surface failures via the status endpoint
+        _pipeline_state["error"] = f"{type(exc).__name__}: {exc}"
+    finally:
+        _pipeline_state.update(running=False,
+                               finished_at=datetime.datetime.now(datetime.timezone.utc).isoformat())
+
+
 @app.post("/api/admin/run-pipeline")
 def admin_run_pipeline(x_admin_token: str | None = Header(None)):
-    """Manual trigger — runs synchronously; fine for admin use."""
+    """Manual trigger — runs in a background thread so the request returns
+    immediately (the full run exceeds the 300s proxy timeout)."""
     admin_auth(x_admin_token)
-    import pipeline
-    pipeline.run()
-    return {"ok": True}
+    if _pipeline_state["running"]:
+        return {"ok": True, "status": "already_running", "started_at": _pipeline_state["started_at"]}
+    import threading
+    threading.Thread(target=_run_pipeline_bg, daemon=True).start()
+    return {"ok": True, "status": "started"}
+
+
+@app.get("/api/admin/pipeline-status")
+def admin_pipeline_status(x_admin_token: str | None = Header(None)):
+    admin_auth(x_admin_token)
+    return _pipeline_state
 
 @app.get("/healthz")
 def healthz():

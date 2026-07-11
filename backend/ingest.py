@@ -17,10 +17,15 @@ DEFAULT_RSS_SOURCES = {
         "https://krebsonsecurity.com/feed/",
         "https://www.darkreading.com/rss.xml",
     ],
+    # Tool Radar needs tool/product-focused sources, NOT general breach news —
+    # AppSec vendor blogs (SAST/SCA/DAST/secrets) + a dedicated tools blog.
     "tools": [
-        "https://feeds.feedburner.com/TheHackersNews",
+        "https://snyk.io/blog/feed/",
+        "https://semgrep.dev/blog/rss.xml",
+        "https://blog.gitguardian.com/rss/",
+        "https://portswigger.net/blog/rss",
+        "https://www.darknet.org.uk/feed/",
         "https://www.helpnetsecurity.com/feed/",
-        "https://securityboulevard.com/feed/",
     ],
     "ai": [
         "https://feeds.feedburner.com/TheHackersNews",

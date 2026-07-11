@@ -75,7 +75,7 @@ DEFAULT_PROMPTS = {
 
 <<CORPUS>>
 
-Select and rank the TOP <<TOP_N>> most significant for a senior AppSec consulting team. Merge duplicates covering the same story. Respond with ONLY a raw JSON array, no fences:
+Select and rank up to <<TOP_N>> items that genuinely match this feed's focus (<<FEED_CONTEXT>>), most significant first, for a senior AppSec consulting team. Merge duplicates covering the same story. CRITICAL: only include items that actually fit the focus — if an item does not fit (e.g. a breach story in a tools feed), EXCLUDE it. Return FEWER than <<TOP_N>> rather than padding the list with off-topic items. Respond with ONLY a raw JSON array, no fences:
 [{"title":"short name","org":"who","date":"Mon YYYY","category":"short category","severity":"<<SEVERITY_HINT>>","one_liner":"why the team should care, max 25 words","source_indices":[ints of the corpus items this is based on]}]
 Real items only; never invent. JSON only.""",
 
