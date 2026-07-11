@@ -1,0 +1,22 @@
+# AppSec Feeder — lift-and-shift bundle.
+# Deploy anywhere with:  cp deploy/.env.example .env  &&  docker compose up -d
+services:
+  api:
+    build: { context: ., dockerfile: deploy/Dockerfile }
+    env_file: .env
+    ports: ["8000:8000"]
+    volumes: [ "feeder-data:/data" ]
+    environment: [ "DB_PATH=/data/briefings.db" ]
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request;urllib.request.urlopen('http://localhost:8000/healthz')"]
+      interval: 30s
+  scheduler:
+    build: { context: ., dockerfile: deploy/Dockerfile }
+    env_file: .env
+    volumes: [ "feeder-data:/data" ]
+    environment: [ "DB_PATH=/data/briefings.db" ]
+    command: ["python", "scheduler.py"]
+    restart: unless-stopped
+volumes:
+  feeder-data:

@@ -1,0 +1,101 @@
+<!doctype html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>AppSec Feeder</title>
+<style>
+:root{--ink:#141414;--paper:#F1F2EF;--yellow:#FFE600;--gray:#5A5D58;--line:#D9DBD4;--soft:#E7E8E2;--card:#fff;--red:#B3261E}
+*{box-sizing:border-box}body{margin:0;background:var(--paper);font-family:-apple-system,Segoe UI,Roboto,sans-serif;color:var(--ink)}
+.mono{font-family:ui-monospace,Menlo,Consolas,monospace}
+header{background:var(--ink)}.hwrap{max-width:920px;margin:0 auto;padding:18px 20px 0;display:flex;justify-content:space-between;align-items:flex-end;flex-wrap:wrap;gap:10px}
+.tag{color:var(--yellow);font-size:11px;letter-spacing:.2em}h1{color:#fff;margin:2px 0 0;font-size:30px}h1 span{color:var(--yellow)}
+.sub{color:#9A9C96;font-size:11px;letter-spacing:.06em}
+.tabs{max-width:920px;margin:0 auto;padding:8px 20px 0;display:flex;flex-wrap:wrap}
+.tabs button{border:none;background:transparent;color:#B8BAB4;padding:12px 14px;font-size:11px;font-weight:700;letter-spacing:.1em;cursor:pointer;border-top:3px solid transparent}
+.tabs button.on{background:var(--paper);color:var(--ink);border-top-color:var(--yellow)}
+.wrap{max-width:920px;margin:0 auto;padding:22px 20px 60px}
+.blurb{color:var(--gray);font-size:13px;max-width:640px;margin:4px 0 14px}
+.bar{display:flex;gap:8px;max-width:640px;margin-bottom:20px}
+input[type=text],input[type=password]{flex:1;padding:9px;border:1px solid var(--line);background:var(--card);font-size:13px}
+.btn{background:var(--ink);color:var(--yellow);border:none;padding:9px 14px;font-weight:800;font-size:11px;letter-spacing:.08em;cursor:pointer}
+.btn.y{background:var(--yellow);color:var(--ink);border:2px solid var(--ink)}
+.idx{background:var(--card);border:1px solid var(--line);margin-bottom:22px}
+.strip{background:var(--ink);color:var(--yellow);display:flex;justify-content:space-between;padding:8px 14px;font-size:11px;letter-spacing:.14em}
+.strip a{color:var(--yellow)}
+.rowi{display:flex;gap:12px;padding:12px 14px;border-top:1px solid var(--soft);align-items:flex-start}
+.rank{font-size:18px;font-weight:800;color:#B8BAB4;width:30px;flex-shrink:0}.rank.top{color:var(--ink)}
+.chip{font-size:10px;font-weight:700;letter-spacing:.1em;padding:2px 7px;background:var(--soft)}
+.chip.CRITICAL,.chip.ADOPT,.chip.SIGNAL{background:var(--ink);color:var(--yellow)}.chip.HIGH{background:var(--red);color:#fff}
+.meta{font-size:10px;color:var(--gray);letter-spacing:.06em}
+.acts{display:flex;flex-direction:column;gap:5px;flex-shrink:0}
+.acts button{font-size:10px;font-weight:800;letter-spacing:.08em;padding:7px 10px;cursor:pointer}
+.dive{background:var(--yellow);color:var(--ink);border:2px solid var(--ink)}.pov{background:var(--ink);color:var(--yellow);border:2px solid var(--ink)}
+.brief{background:var(--card);border:1px solid var(--line);border-left:6px solid var(--yellow);margin-bottom:20px}
+.brief.pov{border-left:6px double var(--ink)}
+.body{padding:6px 18px 18px;font-size:14px;line-height:1.6}
+.body h3{font-family:ui-monospace,Menlo,monospace;font-size:13px;letter-spacing:.1em;text-transform:uppercase;display:flex;gap:8px;align-items:center;margin:20px 0 6px}
+.body h3::before{content:"";width:13px;height:13px;background:var(--yellow);border:2px solid var(--ink)}
+.body table{border-collapse:collapse;width:100%;margin:10px 0;font-size:13px}
+.body th{background:var(--ink);color:var(--yellow);font-family:ui-monospace,monospace;font-size:10px;letter-spacing:.06em;text-align:left;padding:6px 8px}
+.body td{border-top:1px solid var(--soft);padding:6px 8px;vertical-align:top}
+.body code{background:#EFEFE9;border:1px solid var(--soft);padding:0 4px;font-size:.85em}
+.body a{color:var(--ink);text-decoration:underline;text-decoration-color:var(--yellow);text-decoration-thickness:2px;word-break:break-all}
+.load{padding:18px;color:var(--gray);font-size:12px;letter-spacing:.08em}
+.load::before{content:"";display:inline-block;width:11px;height:11px;background:var(--yellow);border:2px solid var(--ink);margin-right:10px;animation:p 1s infinite}
+@keyframes p{50%{opacity:.3}}
+.err{color:var(--red);padding:14px 18px;font-size:13px}
+footer{max-width:920px;margin:0 auto;padding:0 20px 30px;font-size:10px;color:#9A9C96;letter-spacing:.06em}
+#gate{max-width:420px;margin:60px auto;background:var(--card);border:1px solid var(--line);border-left:6px solid var(--yellow);padding:20px}
+</style></head><body>
+<header><div class="hwrap"><div><div class="tag mono">APPSEC TEAM // INTERNAL INTELLIGENCE</div><h1>AppSec <span>Feeder</span></h1></div>
+<div class="sub mono">CACHED DAILY · AI-GENERATED · VERIFY BEFORE CLIENT USE</div></div>
+<div class="tabs mono"><button data-f="breach" class="on">BREACH DEEP-DIVE</button><button data-f="tools">TOOL RADAR</button><button data-f="ai">AI × APPSEC WATCH</button>
+<button onclick="location='/admin'" style="margin-left:auto">⚙ ADMIN</button></div></header>
+
+<div id="gate"><div class="tag mono" style="color:var(--ink)">ANALYST ACCESS</div>
+<p style="font-size:13px;color:var(--gray)">Enter the team API token to load briefings.</p>
+<div class="bar"><input id="tok" type="password" placeholder="API_TOKEN"><button class="btn y" onclick="unlock()">ENTER ▸</button></div></div>
+
+<div class="wrap" id="main" style="display:none">
+<p class="blurb" id="blurb"></p>
+<div class="bar"><input type="text" id="topic" placeholder="Research a custom topic…"><button class="btn" onclick="research('dive')">DEEP-DIVE</button><button class="btn" onclick="research('pov')">POV</button></div>
+<div class="idx"><div class="strip mono"><span id="idxTitle">TOP 10 // INDEX</span><a href="#" onclick="loadIndex();return false">↻ RELOAD</a></div><div id="idxBody"><div class="load mono">LOADING INDEX</div></div></div>
+<div id="briefs"></div></div>
+<footer class="mono">GENERATED ONCE DAILY BY THE PIPELINE · SERVED FROM CACHE · AI-RESEARCHED FROM PUBLIC SOURCES AND MAY CONTAIN ERRORS</footer>
+<script>
+const BLURBS={breach:"The top 10 recent AppSec-relevant breaches. Pick one for the full autopsy — or a partner-grade POV.",tools:"The top 10 new or rising AppSec tools, with honest evaluations and incumbent comparisons.",ai:"The top 10 AI × AppSec developments, separated into signal and hype."};
+let FEED="breach",TOKEN=sessionStorage.getItem("feeder_token")||"";
+const $=id=>document.getElementById(id);
+const api=(p,o={})=>fetch(p,{...o,headers:{"Content-Type":"application/json","x-api-token":TOKEN,...(o.headers||{})}}).then(r=>{if(!r.ok)throw new Error(r.status);return r.json()});
+function unlock(){TOKEN=$('tok').value;api(`/api/feeds/breach/index`).catch(e=>{if(String(e.message)==="401"){sessionStorage.removeItem("feeder_token");alert("Invalid token");throw e}}).finally(()=>{});sessionStorage.setItem("feeder_token",TOKEN);$('gate').style.display='none';$('main').style.display='block';loadIndex()}
+if(TOKEN){$('gate').style.display='none';$('main').style.display='block';window.addEventListener('DOMContentLoaded',loadIndex)}
+document.querySelectorAll('.tabs button[data-f]').forEach(b=>b.onclick=()=>{document.querySelectorAll('.tabs button[data-f]').forEach(x=>x.classList.remove('on'));b.classList.add('on');FEED=b.dataset.f;$('briefs').innerHTML='';loadIndex()});
+function md(t){t=t.replace(/&/g,'&amp;').replace(/</g,'&lt;');const L=t.split('\n');let h='',i=0;
+ const inline=s=>s.replace(/\*\*([^*]+)\*\*/g,'<b>$1</b>').replace(/`([^`]+)`/g,'<code>$1</code>').replace(/\[([^\]]+)\]\((https?:[^)\s]+)\)/g,'<a href="$2" target="_blank" rel="noreferrer">$1</a>');
+ while(i<L.length){const l=L[i];
+  if(!l.trim()){i++;continue}
+  if(l.trim().startsWith('|')&&i+1<L.length&&/^[\s|:-]+$/.test(L[i+1])&&L[i+1].includes('-')){const hd=l.split('|').map(c=>c.trim()).filter(Boolean);i+=2;let rows='';
+   while(i<L.length&&L[i].trim().startsWith('|')){const cs=L[i].split('|').map(c=>c.trim());rows+='<tr>'+cs.filter((c,x)=>!(c===''&&(x===0||x===cs.length-1))).map(c=>`<td>${inline(c)}</td>`).join('')+'</tr>';i++}
+   h+=`<table><thead><tr>${hd.map(c=>`<th>${inline(c)}</th>`).join('')}</tr></thead><tbody>${rows}</tbody></table>`;continue}
+  const m=l.match(/^(#{1,4})\s+(.*)/);if(m){h+=m[1].length<=2?`<h3>${inline(m[2])}</h3>`:`<h4>${inline(m[2])}</h4>`;i++;continue}
+  if(/^\s*[-*+]\s+/.test(l)||/^\s*\d+[.)]\s+/.test(l)){const ord=/^\s*\d/.test(l);let its='';
+   while(i<L.length&&(/^\s*[-*+]\s+/.test(L[i])||/^\s*\d+[.)]\s+/.test(L[i]))){its+=`<li>${inline(L[i].replace(/^\s*([-*+]|\d+[.)])\s+/,''))}</li>`;i++}
+   h+=ord?`<ol>${its}</ol>`:`<ul>${its}</ul>`;continue}
+  let p=[];while(i<L.length&&L[i].trim()&&!/^#|^\s*[-*+]\s|^\s*\d+[.)]\s|^\s*\|/.test(L[i])){p.push(L[i]);i++}
+  h+=`<p>${inline(p.join(' '))}</p>`}
+ return h}
+async function loadIndex(){$('blurb').textContent=BLURBS[FEED];$('idxTitle').textContent=`TOP 10 // ${FEED.toUpperCase()} INDEX`;$('idxBody').innerHTML='<div class="load mono">LOADING INDEX</div>';
+ try{const d=await api(`/api/feeds/${FEED}/index`);const dt=new Date(d.generated_at*1000).toLocaleString();
+  $('idxBody').innerHTML=d.items.map((it,x)=>`<div class="rowi"><span class="rank mono ${x<3?'top':''}">${String(x+1).padStart(2,'0')}</span>
+   <div style="flex:1;min-width:0"><div><b style="font-size:13px">${it.title}</b> <span class="chip mono ${it.severity}">${it.severity||''}</span>
+   <span class="meta mono"> ${[it.org,it.date,it.category].filter(Boolean).join(' · ').toUpperCase()}</span></div>
+   <div style="font-size:13px;color:#3A3C38">${it.one_liner||''}</div></div>
+   <div class="acts mono"><button class="dive" onclick="openBriefing(${it.dive_id??'null'},'dive','${(it.title||'').replace(/'/g,"\\'")}')">DEEP-DIVE ▸</button>
+   <button class="pov" onclick="openBriefing(${it.pov_id??'null'},'pov','${(it.title||'').replace(/'/g,"\\'")}')">POV ▸</button></div></div>`).join('')
+   +`<div class="meta mono" style="padding:10px 14px">GENERATED ${dt.toUpperCase()}</div>`}
+ catch(e){$('idxBody').innerHTML=`<div class="err">Index not available (${e.message}). Run the pipeline from the Admin panel → Operations.</div>`}}
+async function openBriefing(id,kind,title){const box=document.createElement('div');box.className='brief '+kind;
+ box.innerHTML=`<div class="strip mono"><span>${kind==='pov'?'★ POV':'BRIEFING'} // ${title.toUpperCase().slice(0,60)}</span><a href="#" onclick="this.closest('.brief').remove();return false">✕ CLOSE</a></div><div class="body"><div class="load mono">${id?'LOADING FROM CACHE':'RESEARCHING — NOT CACHED, THIS TAKES A MINUTE'}</div></div>`;
+ $('briefs').prepend(box);const body=box.querySelector('.body');
+ try{let content;if(id){const b=await api(`/api/briefings/${id}`);content=b.content_md}
+  else{const r=await api(`/api/research`,{method:'POST',body:JSON.stringify({feed:FEED,topic:title,kind})});content=r.content_md}
+  body.innerHTML=md(content)}catch(e){body.innerHTML=`<div class="err">Failed (${e.message==='429'?'daily on-demand limit reached':e.message}).</div>`}}
+async function research(kind){const t=$('topic').value.trim();if(!t)return;$('topic').value='';openBriefing(null,kind,t)}
+</script></body></html>

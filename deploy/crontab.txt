@@ -1,0 +1,2 @@
+# Daily pipeline at 07:00 IST (01:30 UTC) — briefings ready before the team logs in
+30 1 * * * cd /opt/appsec-feeder/backend && /usr/bin/python3 pipeline.py >> /var/log/appsec-feeder.log 2>&1

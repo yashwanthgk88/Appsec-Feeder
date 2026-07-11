@@ -1,0 +1,30 @@
+{
+  "$schema": "https://developer.microsoft.com/en-us/json-schemas/teams/v1.16/MicrosoftTeams.schema.json",
+  "manifestVersion": "1.16",
+  "version": "1.0.0",
+  "id": "REPLACE-WITH-NEW-GUID",
+  "developer": {
+    "name": "EY GDS AppSec Team",
+    "websiteUrl": "https://appsec-feeder.example.ey.com",
+    "privacyUrl": "https://appsec-feeder.example.ey.com/privacy",
+    "termsOfUseUrl": "https://appsec-feeder.example.ey.com/terms"
+  },
+  "name": { "short": "AppSec Feeder", "full": "AppSec Feeder — Team Intelligence Briefings" },
+  "description": {
+    "short": "Daily AppSec breach, tool and AI intelligence with deep-dives and POVs.",
+    "full": "Top-10 indexes of breaches, tools and AI×AppSec developments, with one-click analyst deep-dives and EY-practice POV documents. AI-generated from public sources — verify before client use."
+  },
+  "icons": { "color": "color.png", "outline": "outline.png" },
+  "accentColor": "#FFE600",
+  "staticTabs": [
+    {
+      "entityId": "appsecFeederHome",
+      "name": "Feeder",
+      "contentUrl": "https://appsec-feeder.example.ey.com?inTeams=true",
+      "websiteUrl": "https://appsec-feeder.example.ey.com",
+      "scopes": ["personal", "team"]
+    }
+  ],
+  "permissions": ["identity"],
+  "validDomains": ["appsec-feeder.example.ey.com"]
+}

@@ -1,0 +1,122 @@
+<!doctype html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>AppSec Feeder — Admin</title>
+<style>
+:root{--ink:#141414;--paper:#F1F2EF;--yellow:#FFE600;--gray:#5A5D58;--line:#D9DBD4;--card:#fff}
+*{box-sizing:border-box}body{margin:0;background:var(--paper);font-family:-apple-system,Segoe UI,Roboto,sans-serif;color:var(--ink)}
+.mono{font-family:ui-monospace,Menlo,Consolas,monospace}
+header{background:var(--ink);padding:16px 20px}
+header .tag{color:var(--yellow);font-size:11px;letter-spacing:.2em}
+header h1{color:#fff;margin:2px 0 0;font-size:24px}header h1 span{color:var(--yellow)}
+.wrap{max-width:900px;margin:0 auto;padding:20px}
+.tabs{display:flex;gap:0;background:var(--ink);max-width:900px;margin:0 auto;padding:0 20px;flex-wrap:wrap}
+.tabs button{border:none;background:transparent;color:#B8BAB4;padding:12px 14px;font-size:11px;font-weight:700;letter-spacing:.1em;cursor:pointer;border-top:3px solid transparent}
+.tabs button.on{background:var(--paper);color:var(--ink);border-top-color:var(--yellow)}
+.card{background:var(--card);border:1px solid var(--line);border-left:6px solid var(--yellow);padding:16px;margin-bottom:18px}
+label{display:block;font-size:11px;letter-spacing:.08em;color:var(--gray);margin:10px 0 4px;text-transform:uppercase}
+input,select,textarea{width:100%;padding:8px;border:1px solid var(--line);background:#FCFCFA;font-size:13px}
+textarea{min-height:260px;font-family:ui-monospace,Menlo,monospace;font-size:12px;line-height:1.5}
+button.act{background:var(--yellow);color:var(--ink);border:2px solid var(--ink);padding:10px 16px;font-weight:800;font-size:11px;letter-spacing:.1em;cursor:pointer;box-shadow:3px 3px 0 var(--ink);margin:12px 8px 0 0}
+button.ghost{background:var(--ink);color:var(--yellow);border:2px solid var(--ink);box-shadow:none}
+.row{display:flex;gap:12px;flex-wrap:wrap}.row>div{flex:1;min-width:200px}
+#msg{position:fixed;bottom:14px;right:14px;background:var(--ink);color:var(--yellow);padding:10px 14px;font-size:12px;display:none;max-width:60ch}
+.hint{font-size:12px;color:var(--gray);margin-top:6px}
+.badge{display:inline-block;background:var(--ink);color:var(--yellow);font-size:10px;letter-spacing:.1em;padding:3px 8px;margin-left:8px}
+</style></head><body>
+<header><div class="tag mono">APPSEC FEEDER // ADMIN CONSOLE</div><h1>Feeder <span>Admin</span></h1></header>
+<div class="tabs mono">
+<button data-t="llm" class="on">LLM ENGINE</button><button data-t="prompts">PROMPTS</button>
+<button data-t="dials">COST DIALS</button><button data-t="notif">NOTIFICATIONS</button>
+<button data-t="sources">SOURCES</button><button data-t="ops">OPERATIONS</button>
+</div>
+<div class="wrap">
+<div class="card"><label>Admin token</label><input id="tok" type="password" placeholder="ADMIN_TOKEN from .env">
+<button class="act" onclick="load()">UNLOCK ▸</button><span class="hint">Keys are env-only — this console never sees or stores API secrets.</span></div>
+
+<div id="p-llm" class="pane">
+ <div class="card"><b>Active engine</b><span class="badge mono" id="llmBadge">—</span>
+  <div class="row"><div><label>Provider</label><select id="llm_provider"><option value="openai_compatible">OpenAI-compatible (Gemini/Groq/DeepSeek/OpenRouter/Ollama)</option><option value="anthropic">Anthropic (Claude)</option></select></div>
+  <div><label>Model</label><input id="llm_model"></div></div>
+  <label>Base URL (OpenAI-compatible only)</label><input id="llm_base_url">
+  <div class="row"><div><label>Anthropic model (if provider=anthropic)</label><input id="llm_anthropic_model"></div>
+  <div><label>POV-only provider override (optional)</label><select id="llm_pov_provider"><option value="">— same as above —</option><option value="openai_compatible">OpenAI-compatible</option><option value="anthropic">Anthropic</option></select></div>
+  <div><label>POV-only model (optional)</label><input id="llm_pov_model" placeholder="e.g. claude-haiku-4-5"></div></div>
+  <div class="hint">Hybrid pattern: cheap model for rankings/deep-dives, better model just for the daily POV.</div>
+  <button class="act" onclick="saveLLM()">SAVE</button><button class="act ghost" onclick="testLLM()">TEST ENGINE ▸</button></div>
+</div>
+
+<div id="p-prompts" class="pane" style="display:none">
+ <div class="card"><label>Template</label><select id="promptName" onchange="showPrompt()"></select>
+ <label>Prompt (placeholders: &lt;&lt;TOPIC&gt;&gt; &lt;&lt;SOURCE&gt;&gt; &lt;&lt;CORPUS&gt;&gt; &lt;&lt;TOP_N&gt;&gt; &lt;&lt;SEVERITY_HINT&gt;&gt; &lt;&lt;FEED_CONTEXT&gt;&gt; &lt;&lt;ANGLE&gt;&gt;)</label>
+ <textarea id="promptText"></textarea>
+ <button class="act" onclick="savePrompt()">SAVE PROMPT</button><button class="act ghost" onclick="resetPrompt()">RESET TO DEFAULT</button></div>
+</div>
+
+<div id="p-dials" class="pane" style="display:none">
+ <div class="card"><div class="row">
+  <div><label>Top-N per index</label><input id="d_top_n_index" type="number"></div>
+  <div><label>Deep-dives / feed / day</label><input id="d_deep_dives_per_feed" type="number"></div>
+  <div><label>POVs / feed / day</label><input id="d_povs_per_feed" type="number"></div></div>
+  <div class="row"><div><label>On-demand daily limit</label><input id="d_ondemand_daily_limit" type="number"></div>
+  <div><label>Max source chars / briefing</label><input id="d_max_source_chars" type="number"></div></div>
+  <div class="hint">These five numbers are your entire monthly bill.</div>
+  <button class="act" onclick="saveDials()">SAVE</button></div>
+</div>
+
+<div id="p-notif" class="pane" style="display:none">
+ <div class="card"><b>Microsoft Teams</b>
+  <div class="row"><div><label>Enabled</label><select id="n_teams_enabled"><option value="true">Yes</option><option value="false">No</option></select></div>
+  <div><label>Items per feed in card</label><input id="n_teams_items_per_feed" type="number"></div></div>
+  <label>Workflows webhook URL <span class="hint" id="teamsMasked"></span></label><input id="n_teams_webhook_url" placeholder="paste to change; leave blank to keep current">
+  <label>Card header</label><input id="n_teams_header">
+  <button class="act ghost" onclick="testNotif('teams')">SEND TEST CARD ▸</button></div>
+ <div class="card"><b>WhatsApp</b> <span class="hint">requires InfoSec/DPO sign-off — token & phone-number ID stay in env</span>
+  <div class="row"><div><label>Enabled</label><select id="n_whatsapp_enabled"><option value="true">Yes</option><option value="false">No</option></select></div>
+  <div><label>Template name</label><input id="n_whatsapp_template"></div></div>
+  <label>Recipients (comma-separated, intl format)</label><input id="n_whatsapp_recipients">
+  <button class="act ghost" onclick="testNotif('whatsapp')">SEND TEST ▸</button></div>
+ <div class="card"><label>Disclaimer appended to notifications</label><input id="n_disclaimer">
+  <label>Feeds in daily digest (comma: breach,tools,ai)</label><input id="n_feeds_in_digest">
+  <button class="act" onclick="saveNotif()">SAVE ALL NOTIFICATION SETTINGS</button></div>
+</div>
+
+<div id="p-sources" class="pane" style="display:none">
+ <div class="card"><label>RSS/Atom sources per feed (JSON)</label><textarea id="sourcesText"></textarea>
+ <div class="hint">CISA KEV + NVD are always included for the breach feed. Add client- or sector-specific sources here — no redeploy needed.</div>
+ <button class="act" onclick="saveSources()">SAVE SOURCES</button></div>
+</div>
+
+<div id="p-ops" class="pane" style="display:none">
+ <div class="card"><b>Operations</b>
+ <div class="hint">Run the full pipeline now (ingest → rank → generate → notify). Synchronous; takes a few minutes.</div>
+ <button class="act" onclick="runPipeline()">RUN PIPELINE NOW ▸</button></div>
+</div>
+</div>
+<div id="msg" class="mono"></div>
+<script>
+let CFG=null;
+const $=id=>document.getElementById(id);
+const msg=t=>{const m=$('msg');m.textContent=t;m.style.display='block';setTimeout(()=>m.style.display='none',5000)};
+const hdr=()=>({'Content-Type':'application/json','x-admin-token':$('tok').value});
+async function api(p,o={}){const r=await fetch(p,{...o,headers:{...hdr(),...(o.headers||{})}});if(!r.ok)throw new Error(r.status);return r.json()}
+document.querySelectorAll('.tabs button').forEach(b=>b.onclick=()=>{document.querySelectorAll('.tabs button').forEach(x=>x.classList.remove('on'));b.classList.add('on');document.querySelectorAll('.pane').forEach(p=>p.style.display='none');$('p-'+b.dataset.t).style.display='block'});
+async function load(){try{CFG=await api('/api/admin/config');
+ const l=CFG.llm;$('llm_provider').value=l.provider;$('llm_model').value=l.model;$('llm_base_url').value=l.base_url;$('llm_anthropic_model').value=l.anthropic_model;$('llm_pov_provider').value=l.pov_provider||'';$('llm_pov_model').value=l.pov_model||'';
+ $('llmBadge').textContent=(l.provider==='anthropic'?l.anthropic_model:l.model);
+ const pn=$('promptName');pn.innerHTML=CFG.prompt_names.map(n=>`<option>${n}</option>`).join('');showPrompt();
+ for(const k in CFG.dials){const e=$('d_'+k);if(e)e.value=CFG.dials[k]}
+ const n=CFG.notifications;$('n_teams_enabled').value=String(n.teams_enabled);$('n_teams_items_per_feed').value=n.teams_items_per_feed;$('teamsMasked').textContent=n.teams_webhook_url_masked?('current: '+n.teams_webhook_url_masked):'(none set)';$('n_teams_header').value=n.teams_header;
+ $('n_whatsapp_enabled').value=String(n.whatsapp_enabled);$('n_whatsapp_template').value=n.whatsapp_template;$('n_whatsapp_recipients').value=(n.whatsapp_recipients||[]).join(',');
+ $('n_disclaimer').value=n.disclaimer;$('n_feeds_in_digest').value=(n.feeds_in_digest||[]).join(',');
+ $('sourcesText').value=JSON.stringify(CFG.sources,null,2);
+ msg('Config loaded')}catch(e){msg('Unlock failed: '+e.message)}}
+function showPrompt(){if(CFG)$('promptText').value=CFG.prompts[$('promptName').value]||''}
+async function saveLLM(){await api('/api/admin/config',{method:'PUT',body:JSON.stringify({llm:{provider:$('llm_provider').value,model:$('llm_model').value,base_url:$('llm_base_url').value,anthropic_model:$('llm_anthropic_model').value,pov_provider:$('llm_pov_provider').value,pov_model:$('llm_pov_model').value}})});msg('LLM saved');load()}
+async function testLLM(){msg('Testing engine…');const r=await api('/api/admin/test/llm',{method:'POST'});msg(r.ok?('Engine OK — reply: '+r.reply):('Engine FAILED: '+r.error))}
+async function savePrompt(){await api('/api/admin/prompts/'+$('promptName').value,{method:'PUT',body:JSON.stringify({text:$('promptText').value})});CFG.prompts[$('promptName').value]=$('promptText').value;msg('Prompt saved')}
+async function resetPrompt(){const r=await api('/api/admin/prompts/'+$('promptName').value+'/reset',{method:'POST'});CFG.prompts[$('promptName').value]=r.text;showPrompt();msg('Prompt reset to default')}
+async function saveDials(){const d={};['top_n_index','deep_dives_per_feed','povs_per_feed','ondemand_daily_limit','max_source_chars'].forEach(k=>d[k]=$('d_'+k).value);await api('/api/admin/config',{method:'PUT',body:JSON.stringify({dials:d})});msg('Dials saved')}
+async function saveNotif(){const n={teams_enabled:$('n_teams_enabled').value==='true',teams_items_per_feed:+$('n_teams_items_per_feed').value,teams_header:$('n_teams_header').value,whatsapp_enabled:$('n_whatsapp_enabled').value==='true',whatsapp_template:$('n_whatsapp_template').value,whatsapp_recipients:$('n_whatsapp_recipients').value.split(',').map(s=>s.trim()).filter(Boolean),disclaimer:$('n_disclaimer').value,feeds_in_digest:$('n_feeds_in_digest').value.split(',').map(s=>s.trim()).filter(Boolean)};const w=$('n_teams_webhook_url').value.trim();if(w)n.teams_webhook_url=w;await api('/api/admin/config',{method:'PUT',body:JSON.stringify({notifications:n})});$('n_teams_webhook_url').value='';msg('Notifications saved');load()}
+async function testNotif(k){msg('Sending test…');await api('/api/admin/test/'+k,{method:'POST'});msg('Test sent — check '+k)}
+async function saveSources(){let s;try{s=JSON.parse($('sourcesText').value)}catch(e){return msg('Invalid JSON: '+e.message)}await api('/api/admin/config',{method:'PUT',body:JSON.stringify({sources:s})});msg('Sources saved')}
+async function runPipeline(){msg('Pipeline running — this takes a few minutes…');try{await api('/api/admin/run-pipeline',{method:'POST'});msg('Pipeline complete')}catch(e){msg('Pipeline failed: '+e.message)}}
+</script></body></html>
