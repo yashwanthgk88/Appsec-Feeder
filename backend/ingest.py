@@ -118,6 +118,28 @@ def fetch_article_text(url: str, max_chars: int) -> str:
         return ""
 
 
+import urllib.parse
+
+# Clean, consistent display names for the wire (feed titles are unreliable).
+FRIENDLY_SOURCES = {
+    "feeds.feedburner.com": "The Hacker News", "thehackernews.com": "The Hacker News",
+    "bleepingcomputer.com": "BleepingComputer", "krebsonsecurity.com": "Krebs on Security",
+    "darkreading.com": "Dark Reading", "helpnetsecurity.com": "Help Net Security",
+    "securityboulevard.com": "Security Boulevard", "snyk.io": "Snyk", "semgrep.dev": "Semgrep",
+    "gitguardian.com": "GitGuardian", "portswigger.net": "PortSwigger", "darknet.org.uk": "Darknet",
+    "simonwillison.net": "Simon Willison", "embracethered.com": "Embrace The Red",
+}
+
+
+def _friendly(url: str) -> str:
+    host = urllib.parse.urlparse(url).netloc.lower().removeprefix("www.")
+    for dom, name in FRIENDLY_SOURCES.items():
+        if host.endswith(dom):
+            return name
+    core = host.split(".")[0]
+    return core[:1].upper() + core[1:] if core else url
+
+
 def _entry_image(e) -> str:
     """Best-effort thumbnail from an RSS entry (media/enclosure). May be empty."""
     for key in ("media_thumbnail", "media_content"):
@@ -149,7 +171,7 @@ def wire(feed_key: str, limit: int = 12) -> dict:
     for url in rss_sources().get(feed_key, []):
         try:
             parsed = feedparser.parse(url)
-            sname = parsed.feed.get("title", url) or url
+            sname = _friendly(url)
             sources.append(sname)
             for e in parsed.entries[:12]:
                 pp = e.get("published_parsed") or e.get("updated_parsed")
@@ -177,13 +199,20 @@ def wire(feed_key: str, limit: int = 12) -> dict:
                           "ts": ts, "exploited": True, "image": ""})
         sources.append("CISA KEV")
 
-    seen, out = set(), []
+    # Newest first, deduped, and capped per source so no single feed dominates.
+    seen, per, out = set(), {}, []
     for it in sorted(items, key=lambda x: x["ts"], reverse=True):
         k = it["title"].lower()[:80]
-        if k and k not in seen:
-            seen.add(k)
-            out.append(it)
-    data = {"generated_at": int(now), "sources": sorted(set(sources)), "items": out[:limit]}
+        if not k or k in seen:
+            continue
+        if per.get(it["source"], 0) >= 4:
+            continue
+        seen.add(k)
+        per[it["source"]] = per.get(it["source"], 0) + 1
+        out.append(it)
+        if len(out) >= limit:
+            break
+    data = {"generated_at": int(now), "sources": sorted(set(sources)), "items": out}
     _wire_cache[feed_key] = (now, data)
     return data
 
