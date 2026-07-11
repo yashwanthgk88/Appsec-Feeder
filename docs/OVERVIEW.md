@@ -1,4 +1,4 @@
-# AppSec Feeder — Consolidated Overview
+# AppSec Radar — Consolidated Overview
 
 An internal intelligence platform that keeps an AppSec team current on three fronts,
 with analyst-grade depth instead of headlines:

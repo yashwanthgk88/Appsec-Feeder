@@ -9,7 +9,7 @@
     "privacyUrl": "https://appsec-feeder.example.ey.com/privacy",
     "termsOfUseUrl": "https://appsec-feeder.example.ey.com/terms"
   },
-  "name": { "short": "AppSec Feeder", "full": "AppSec Feeder — Team Intelligence Briefings" },
+  "name": { "short": "AppSec Radar", "full": "AppSec Radar — Team Intelligence Briefings" },
   "description": {
     "short": "Daily AppSec breach, tool and AI intelligence with deep-dives and POVs.",
     "full": "Top-10 indexes of breaches, tools and AI×AppSec developments, with one-click analyst deep-dives and EY-practice POV documents. AI-generated from public sources — verify before client use."
@@ -19,7 +19,7 @@
   "staticTabs": [
     {
       "entityId": "appsecFeederHome",
-      "name": "Feeder",
+      "name": "Radar",
       "contentUrl": "https://appsec-feeder.example.ey.com?inTeams=true",
       "websiteUrl": "https://appsec-feeder.example.ey.com",
       "scopes": ["personal", "team"]

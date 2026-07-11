@@ -12,7 +12,7 @@ import store
 import analyze
 import ingest
 
-app = FastAPI(title="AppSec Feeder API")
+app = FastAPI(title="AppSec Radar API")
 app.add_middleware(CORSMiddleware, allow_origins=["*"], allow_methods=["*"], allow_headers=["*"])
 
 
@@ -142,7 +142,7 @@ def admin_test_llm(x_admin_token: str | None = Header(None)):
 def admin_test_teams(x_admin_token: str | None = Header(None)):
     admin_auth(x_admin_token)
     teams_notify.send_daily_card({"breach": [{"title": "Test notification", "severity": "NOTABLE",
-                                              "one_liner": "AppSec Feeder Teams webhook is working."}]})
+                                              "one_liner": "AppSec Radar Teams webhook is working."}]})
     return {"ok": True}
 
 @app.post("/api/admin/test/whatsapp")

@@ -1,11 +1,14 @@
 <!doctype html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>AppSec Feeder</title>
+<title>AppSec Radar</title>
 <style>
 :root{--ink:#141414;--paper:#F1F2EF;--yellow:#FFE600;--gray:#5A5D58;--line:#D9DBD4;--soft:#E7E8E2;--card:#fff;--red:#B3261E}
 *{box-sizing:border-box}body{margin:0;background:var(--paper);font-family:-apple-system,Segoe UI,Roboto,sans-serif;color:var(--ink)}
 .mono{font-family:ui-monospace,Menlo,Consolas,monospace}
 header{background:var(--ink)}.hwrap{max-width:920px;margin:0 auto;padding:18px 20px 0;display:flex;justify-content:space-between;align-items:flex-end;flex-wrap:wrap;gap:10px}
 .tag{color:var(--yellow);font-size:11px;letter-spacing:.2em}h1{color:#fff;margin:2px 0 0;font-size:30px}h1 span{color:var(--yellow)}
+.brand{display:flex;align-items:center;gap:12px}.mark{width:44px;height:44px;flex-shrink:0}
+.mark .sweep{transform-origin:24px 24px;animation:radar 4s linear infinite}@keyframes radar{to{transform:rotate(360deg)}}
+@media (prefers-reduced-motion:reduce){.mark .sweep{animation:none}}
 .sub{color:#9A9C96;font-size:11px;letter-spacing:.06em}
 .tabs{max-width:920px;margin:0 auto;padding:8px 20px 0;display:flex;flex-wrap:wrap}
 .tabs button{border:none;background:transparent;color:#B8BAB4;padding:12px 14px;font-size:11px;font-weight:700;letter-spacing:.1em;cursor:pointer;border-top:3px solid transparent}
@@ -44,7 +47,13 @@ input[type=text],input[type=password]{flex:1;padding:9px;border:1px solid var(--
 footer{max-width:920px;margin:0 auto;padding:0 20px 30px;font-size:10px;color:#9A9C96;letter-spacing:.06em}
 #gate{max-width:420px;margin:60px auto;background:var(--card);border:1px solid var(--line);border-left:6px solid var(--yellow);padding:20px}
 </style></head><body>
-<header><div class="hwrap"><div><div class="tag mono">APPSEC TEAM // INTERNAL INTELLIGENCE</div><h1>AppSec <span>Feeder</span></h1></div>
+<header><div class="hwrap"><div class="brand">
+<svg class="mark" viewBox="0 0 48 48" aria-hidden="true" fill="none" stroke="#FFE600" stroke-linecap="round">
+<circle cx="24" cy="24" r="21" stroke-width="2.4"/><circle cx="24" cy="24" r="14" stroke-width="1.2" opacity=".45"/><circle cx="24" cy="24" r="7" stroke-width="1.2" opacity=".45"/>
+<line x1="3" y1="24" x2="45" y2="24" stroke-width="1" opacity=".3"/><line x1="24" y1="3" x2="24" y2="45" stroke-width="1" opacity=".3"/>
+<g class="sweep"><path d="M24 24 L24 3 A21 21 0 0 1 42.2 13.5 Z" fill="#FFE600" fill-opacity=".28" stroke="none"/><line x1="24" y1="24" x2="24" y2="3" stroke-width="2"/></g>
+<circle cx="33" cy="14" r="2.6" fill="#FFE600" stroke="none"/></svg>
+<div><div class="tag mono">APPSEC TEAM // INTERNAL INTELLIGENCE</div><h1>AppSec <span>Radar</span></h1></div></div>
 <div class="sub mono">CACHED DAILY · AI-GENERATED · VERIFY BEFORE CLIENT USE</div></div>
 <div class="tabs mono"><button data-f="breach" class="on">BREACH DEEP-DIVE</button><button data-f="tools">TOOL RADAR</button><button data-f="ai">AI × APPSEC WATCH</button>
 <button onclick="location='/admin'" style="margin-left:auto">⚙ ADMIN</button></div></header>

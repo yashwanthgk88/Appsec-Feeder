@@ -1,10 +1,14 @@
 <!doctype html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>AppSec Feeder — Admin</title>
+<title>AppSec Radar — Admin</title>
 <style>
 :root{--ink:#141414;--paper:#F1F2EF;--yellow:#FFE600;--gray:#5A5D58;--line:#D9DBD4;--card:#fff}
 *{box-sizing:border-box}body{margin:0;background:var(--paper);font-family:-apple-system,Segoe UI,Roboto,sans-serif;color:var(--ink)}
 .mono{font-family:ui-monospace,Menlo,Consolas,monospace}
 header{background:var(--ink);padding:16px 20px}
+header .brand{display:flex;align-items:center;gap:11px}
+header .mark{width:38px;height:38px;flex-shrink:0}
+header .mark .sweep{transform-origin:24px 24px;animation:radar 4s linear infinite}@keyframes radar{to{transform:rotate(360deg)}}
+@media (prefers-reduced-motion:reduce){header .mark .sweep{animation:none}}
 header .tag{color:var(--yellow);font-size:11px;letter-spacing:.2em}
 header h1{color:#fff;margin:2px 0 0;font-size:24px}header h1 span{color:var(--yellow)}
 .wrap{max-width:900px;margin:0 auto;padding:20px}
@@ -22,7 +26,13 @@ button.ghost{background:var(--ink);color:var(--yellow);border:2px solid var(--in
 .hint{font-size:12px;color:var(--gray);margin-top:6px}
 .badge{display:inline-block;background:var(--ink);color:var(--yellow);font-size:10px;letter-spacing:.1em;padding:3px 8px;margin-left:8px}
 </style></head><body>
-<header><div class="tag mono">APPSEC FEEDER // ADMIN CONSOLE</div><h1>Feeder <span>Admin</span></h1></header>
+<header><div class="brand">
+<svg class="mark" viewBox="0 0 48 48" aria-hidden="true" fill="none" stroke="#FFE600" stroke-linecap="round">
+<circle cx="24" cy="24" r="21" stroke-width="2.4"/><circle cx="24" cy="24" r="14" stroke-width="1.2" opacity=".45"/><circle cx="24" cy="24" r="7" stroke-width="1.2" opacity=".45"/>
+<line x1="3" y1="24" x2="45" y2="24" stroke-width="1" opacity=".3"/><line x1="24" y1="3" x2="24" y2="45" stroke-width="1" opacity=".3"/>
+<g class="sweep"><path d="M24 24 L24 3 A21 21 0 0 1 42.2 13.5 Z" fill="#FFE600" fill-opacity=".28" stroke="none"/><line x1="24" y1="24" x2="24" y2="3" stroke-width="2"/></g>
+<circle cx="33" cy="14" r="2.6" fill="#FFE600" stroke="none"/></svg>
+<div><div class="tag mono">APPSEC RADAR // ADMIN CONSOLE</div><h1>Radar <span>Admin</span></h1></div></div></header>
 <div class="tabs mono">
 <button data-t="llm" class="on">LLM ENGINE</button><button data-t="prompts">PROMPTS</button>
 <button data-t="dials">COST DIALS</button><button data-t="notif">NOTIFICATIONS</button>

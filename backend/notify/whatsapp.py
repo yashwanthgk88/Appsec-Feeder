@@ -6,7 +6,7 @@ Prerequisites (one-time):
   3. An APPROVED message template — business-initiated pushes MUST use a
      template outside the 24-hour customer-service window. Suggested template
      'appsec_daily_digest' with 3 body variables:
-       "🛡️ AppSec Feeder daily: Top breach: {{1}}. Top tool: {{2}}.
+       "🛡️ AppSec Radar daily: Top breach: {{1}}. Top tool: {{2}}.
         AI watch: {{3}}. Open the app for full briefings & POVs."
   4. Recipients must opt in (firm policy + Meta policy).
 

@@ -25,7 +25,7 @@ def send_daily_card(digest: dict):
     digest = {k: v for k, v in digest.items() if k in n.get("feeds_in_digest", list(digest))}
     body = [{
         "type": "TextBlock", "size": "Large", "weight": "Bolder",
-        "text": n.get("teams_header", "AppSec Feeder — Daily Intelligence"),
+        "text": n.get("teams_header", "AppSec Radar — Daily Intelligence"),
     }]
     for feed, items in digest.items():
         body.append({"type": "TextBlock", "weight": "Bolder", "spacing": "Medium",
@@ -44,7 +44,7 @@ def send_daily_card(digest: dict):
             "content": {
                 "$schema": "http://adaptivecards.io/schemas/adaptive-card.json",
                 "type": "AdaptiveCard", "version": "1.4", "body": body,
-                "actions": [{"type": "Action.OpenUrl", "title": "Open AppSec Feeder",
+                "actions": [{"type": "Action.OpenUrl", "title": "Open AppSec Radar",
                              "url": config.APP_BASE_URL}],
             },
         }],

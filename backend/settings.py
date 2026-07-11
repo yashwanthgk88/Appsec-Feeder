@@ -48,7 +48,7 @@ def get_notifications():
         "teams_enabled": bool(config.TEAMS_WEBHOOK_URL),
         "teams_webhook_url": config.TEAMS_WEBHOOK_URL,
         "teams_items_per_feed": 3,
-        "teams_header": "🛡️ AppSec Feeder — Daily Intelligence",
+        "teams_header": "🛡️ AppSec Radar — Daily Intelligence",
         "whatsapp_enabled": config.WHATSAPP_ENABLED,
         "whatsapp_recipients": config.WHATSAPP_RECIPIENTS,
         "whatsapp_template": config.WHATSAPP_TEMPLATE,

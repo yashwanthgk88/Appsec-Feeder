@@ -15,7 +15,7 @@
 Teams channel → ⋯ → Workflows → "Post to a channel when a webhook request is
 received" → copy the URL → set `TEAMS_WEBHOOK_URL` in `.env`.
 The pipeline posts an Adaptive Card each morning with the top 3 per feed and
-an "Open AppSec Feeder" button.
+an "Open AppSec Radar" button.
 
 Upgrade path when you outgrow this: a proper Bot Framework bot enables
 @mentions ("@Feeder pov on <topic>") and per-user DMs — bigger lift (Azure

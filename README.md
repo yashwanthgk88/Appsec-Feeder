@@ -1,4 +1,8 @@
-# AppSec Feeder — Production Architecture
+<p align="center">
+  <img src="backend/logo.svg" alt="AppSec Radar" width="340" height="96">
+</p>
+
+# AppSec Radar — Production Architecture
 
 Generate-once / serve-many intelligence pipeline. Cost scales with **content generated
 per day**, not with the number of analysts reading it.
