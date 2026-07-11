@@ -1,14 +1,45 @@
 """LLM layer — provider, models and prompts all resolved at runtime from settings."""
 import json
+import re
+import time
 import settings as S
+
+# Free-tier LLM endpoints enforce per-minute request caps; a daily pipeline run
+# bursts ~15 calls and will trip them. Retry on 429, honouring the server's
+# suggested retryDelay when present, with a capped exponential fallback.
+_MAX_RETRIES = 5
+
+
+def _retry_delay_from(exc, attempt: int) -> float:
+    m = re.search(r"retry in ([0-9.]+)s|retryDelay['\"]?:\s*['\"]?([0-9.]+)s", str(exc))
+    if m:
+        return min(60.0, float(m.group(1) or m.group(2)) + 1.0)
+    return min(60.0, 2.0 ** attempt)
+
+
+def _with_retries(call):
+    for attempt in range(_MAX_RETRIES):
+        try:
+            return call()
+        except Exception as exc:
+            status = getattr(exc, "status_code", None)
+            if status != 429 and "429" not in str(exc) and "RESOURCE_EXHAUSTED" not in str(exc):
+                raise
+            if attempt == _MAX_RETRIES - 1:
+                raise
+            delay = _retry_delay_from(exc, attempt)
+            print(f"[analyze] 429 rate-limited; retry {attempt + 1}/{_MAX_RETRIES} in {delay:.0f}s")
+            time.sleep(delay)
+
 
 def _complete_with(provider: str, base_url: str, model: str, prompt: str, max_tokens: int) -> str:
     if provider == "anthropic":
         import config
         from anthropic import Anthropic
         client = Anthropic(api_key=config.ANTHROPIC_API_KEY)
-        msg = client.messages.create(model=model, max_tokens=max_tokens,
-                                     messages=[{"role": "user", "content": prompt}])
+        msg = _with_retries(lambda: client.messages.create(
+            model=model, max_tokens=max_tokens,
+            messages=[{"role": "user", "content": prompt}]))
         return "".join(b.text for b in msg.content if b.type == "text")
     import config
     from openai import OpenAI
@@ -20,9 +51,9 @@ def _complete_with(provider: str, base_url: str, model: str, prompt: str, max_to
     kwargs = {}
     if provider == "openai_compatible":
         kwargs["extra_body"] = {"reasoning_effort": "high"}
-    resp = client.chat.completions.create(model=model, max_tokens=max_tokens,
-                                          messages=[{"role": "user", "content": prompt}],
-                                          **kwargs)
+    resp = _with_retries(lambda: client.chat.completions.create(
+        model=model, max_tokens=max_tokens,
+        messages=[{"role": "user", "content": prompt}], **kwargs))
     return resp.choices[0].message.content or ""
 
 def complete(prompt: str, max_tokens: int = 3000, task: str = "default") -> str:
