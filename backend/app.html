@@ -30,6 +30,7 @@ input[type=text],input[type=password]{flex:1;padding:9px;border:1px solid var(--
 .acts{display:flex;flex-direction:column;gap:5px;flex-shrink:0}
 .acts button{font-size:10px;font-weight:800;letter-spacing:.08em;padding:7px 10px;cursor:pointer}
 .dive{background:var(--yellow);color:var(--ink);border:2px solid var(--ink)}.pov{background:var(--ink);color:var(--yellow);border:2px solid var(--ink)}
+button:disabled{opacity:.4;cursor:not-allowed;box-shadow:none}
 .brief{background:var(--card);border:1px solid var(--line);border-left:6px solid var(--yellow);margin-bottom:20px}
 .brief.pov{border-left:6px double var(--ink)}
 .body{padding:6px 18px 18px;font-size:14px;line-height:1.6}
@@ -100,11 +101,19 @@ async function loadIndex(){$('blurb').textContent=BLURBS[FEED];$('idxTitle').tex
    <button class="pov" onclick="openBriefing(${it.pov_id??'null'},'pov','${(it.title||'').replace(/'/g,"\\'")}')">POV ▸</button></div></div>`).join('')
    +`<div class="meta mono" style="padding:10px 14px">GENERATED ${dt.toUpperCase()}</div>`}
  catch(e){$('idxBody').innerHTML=`<div class="err">Index not available (${e.message}). Run the pipeline from the Admin panel → Operations.</div>`}}
-async function openBriefing(id,kind,title){const box=document.createElement('div');box.className='brief '+kind;
+let BUSY=false;
+function setBusy(on){BUSY=on;document.querySelectorAll('#main .acts button, #main .bar .btn').forEach(b=>b.disabled=on)}
+async function openBriefing(id,kind,title){
+ if(BUSY)return;                         // block new generations until the current one finishes
+ setBusy(true);
+ const box=document.createElement('div');box.className='brief '+kind;
  box.innerHTML=`<div class="strip mono"><span>${kind==='pov'?'★ POV':'BRIEFING'} // ${title.toUpperCase().slice(0,60)}</span><a href="#" onclick="this.closest('.brief').remove();return false">✕ CLOSE</a></div><div class="body"><div class="load mono">${id?'LOADING FROM CACHE':'RESEARCHING — NOT CACHED, THIS TAKES A MINUTE'}</div></div>`;
  $('briefs').prepend(box);const body=box.querySelector('.body');
+ box.scrollIntoView({behavior:'smooth',block:'start'});   // take the user down to the briefing
  try{let content;if(id){const b=await api(`/api/briefings/${id}`);content=b.content_md}
   else{const r=await api(`/api/research`,{method:'POST',body:JSON.stringify({feed:FEED,topic:title,kind})});content=r.content_md}
-  body.innerHTML=md(content)}catch(e){body.innerHTML=`<div class="err">Failed (${e.message==='429'?'daily on-demand limit reached':e.message}).</div>`}}
-async function research(kind){const t=$('topic').value.trim();if(!t)return;$('topic').value='';openBriefing(null,kind,t)}
+  body.innerHTML=md(content)}
+ catch(e){body.innerHTML=`<div class="err">Failed (${e.message==='429'?'daily on-demand limit reached':e.message}).</div>`}
+ finally{setBusy(false)}}
+async function research(kind){if(BUSY)return;const t=$('topic').value.trim();if(!t)return;$('topic').value='';openBriefing(null,kind,t)}
 </script></body></html>
