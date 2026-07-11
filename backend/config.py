@@ -37,3 +37,14 @@ WHATSAPP_TOKEN = os.getenv("WHATSAPP_TOKEN", "")         # Meta permanent token
 WHATSAPP_PHONE_NUMBER_ID = os.getenv("WHATSAPP_PHONE_NUMBER_ID", "")
 WHATSAPP_RECIPIENTS = [r.strip() for r in os.getenv("WHATSAPP_RECIPIENTS", "").split(",") if r.strip()]
 WHATSAPP_TEMPLATE = os.getenv("WHATSAPP_TEMPLATE", "appsec_daily_digest")
+
+# --- Email (SMTP) digest ---
+EMAIL_ENABLED = os.getenv("EMAIL_ENABLED", "false").lower() == "true"
+SMTP_HOST = os.getenv("SMTP_HOST", "smtp.gmail.com")
+SMTP_PORT = int(os.getenv("SMTP_PORT", "587"))
+SMTP_USER = os.getenv("SMTP_USER", "")                   # mailbox / app-password user
+SMTP_PASSWORD = os.getenv("SMTP_PASSWORD", "")           # app password (env-only, never in DB)
+SMTP_STARTTLS = os.getenv("SMTP_STARTTLS", "true").lower() == "true"
+EMAIL_FROM = os.getenv("EMAIL_FROM", "") or SMTP_USER    # From address (defaults to SMTP_USER)
+EMAIL_RECIPIENTS = [r.strip() for r in os.getenv("EMAIL_RECIPIENTS", "").split(",") if r.strip()]
+EMAIL_SUBJECT = os.getenv("EMAIL_SUBJECT", "🛡️ AppSec Radar — Daily Intelligence")

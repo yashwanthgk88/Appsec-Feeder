@@ -8,7 +8,7 @@ import settings as S
 import ingest
 import analyze
 import store
-from notify import teams, whatsapp
+from notify import teams, whatsapp, email_notify
 
 FEEDS = ["breach", "tools", "ai"]
 
@@ -62,6 +62,10 @@ def run():
     if digest:
         print("[pipeline] notifying…")
         teams.send_daily_card(digest)
+        try:
+            email_notify.send_daily_digest(digest)
+        except Exception as exc:  # a mail failure must not fail the pipeline
+            print(f"[email] send failed: {exc}")
         if config.WHATSAPP_ENABLED:
             whatsapp.send_daily_digest(digest)
     print(f"[pipeline] done. feeds ok={list(digest)} failed={errors}")

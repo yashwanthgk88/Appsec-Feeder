@@ -68,7 +68,7 @@ def research(req: ResearchRequest, x_api_token: str | None = Header(None)):
 import os
 from fastapi.responses import HTMLResponse
 import settings as S
-from notify import teams as teams_notify, whatsapp as wa_notify
+from notify import teams as teams_notify, whatsapp as wa_notify, email_notify
 
 ADMIN_TOKEN = os.getenv("ADMIN_TOKEN", "change-me-admin")
 
@@ -151,6 +151,20 @@ def admin_test_whatsapp(x_admin_token: str | None = Header(None)):
     wa_notify.send_daily_digest({"breach": [{"title": "Test notification"}],
                                  "tools": [{"title": "-"}], "ai": [{"title": "-"}]})
     return {"ok": True}
+
+@app.post("/api/admin/test/email")
+def admin_test_email(x_admin_token: str | None = Header(None)):
+    admin_auth(x_admin_token)
+    sample = {
+        "breach": [{"title": "Test breach headline", "severity": "CRITICAL",
+                    "one_liner": "This is a test email from AppSec Radar."}],
+        "tools": [{"title": "Test tool", "severity": "ADOPT", "one_liner": "Radar email delivery works."}],
+        "ai": [{"title": "Test AI signal", "severity": "SIGNAL", "one_liner": "You can safely ignore this."}],
+    }
+    try:
+        return email_notify.send_daily_digest(sample) or {"ok": True}
+    except Exception as exc:
+        return {"ok": False, "error": f"{type(exc).__name__}: {exc}"}
 
 _pipeline_state = {"running": False, "started_at": None, "finished_at": None, "error": None}
 

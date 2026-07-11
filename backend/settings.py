@@ -54,6 +54,9 @@ def get_notifications():
         "whatsapp_template": config.WHATSAPP_TEMPLATE,
         "disclaimer": "AI-generated from public sources — verify before client use.",
         "feeds_in_digest": ["breach", "tools", "ai"],
+        "email_enabled": config.EMAIL_ENABLED,
+        "email_recipients": config.EMAIL_RECIPIENTS,
+        "email_subject": config.EMAIL_SUBJECT,
     })
 
 # ---------------- prompt templates ----------------
