@@ -245,11 +245,19 @@ document.querySelectorAll('.railhead .sw button').forEach(b=>b.onclick=()=>{
  document.querySelectorAll('.railhead .sw button').forEach(x=>x.classList.remove('on'));
  b.classList.add('on');WIRE_VIEW=b.dataset.wv;renderWire();});
 function startWireTimers(){if(WIRE_TIMERS)return;WIRE_TIMERS=true;
- setInterval(loadWire,300000);setInterval(()=>{if(WIRE_DATA)renderWire();},60000);setInterval(loadUsage,120000);}
+ setInterval(loadWire,300000);setInterval(()=>{if(WIRE_DATA)renderWire();},60000);setInterval(loadUsage,120000);
+ setInterval(()=>{if(!BUDGET.resetTs)return;if(Date.now()>=BUDGET.resetTs)loadUsage();else renderBudget();},1000);}
 
-/* ---- shared daily research-budget indicator ---- */
-function renderBudget(u,n){const el=$('budget');if(!el)return;const pct=n?Math.min(100,Math.round(u/n*100)):0;
- el.className='budget mono'+(u>=n?' full':pct>=80?' warn':'');
- el.innerHTML=`RESEARCH BUDGET · <b>${u} / ${n}</b> used today <span class="bbar"><i style="width:${pct}%"></i></span>${u>=n?' · LIMIT REACHED — resets midnight IST':''}`;}
-async function loadUsage(){try{const d=await api('/api/usage');renderBudget(d.used,d.limit);}catch(e){}}
+/* ---- shared research budget + AI-quota refresh countdown ---- */
+let BUDGET={u:0,n:0,resetAt:null,resetTs:0};
+function _fmtLeft(ms){if(ms<0)ms=0;const s=Math.floor(ms/1000),h=Math.floor(s/3600),m=Math.floor(s%3600/60);return h>0?h+'h '+m+'m':(m>0?m+'m':'<1m');}
+function renderBudget(){const el=$('budget');if(!el)return;const b=BUDGET;const pct=b.n?Math.min(100,Math.round(b.u/b.n*100)):0;
+ el.className='budget mono'+(b.u>=b.n?' full':pct>=80?' warn':'');
+ const rt=b.resetAt?new Date(b.resetAt).toLocaleTimeString('en-IN',{timeZone:'Asia/Kolkata',hour:'2-digit',minute:'2-digit',hour12:true}):'';
+ const left=b.resetTs?_fmtLeft(b.resetTs-Date.now()):'';
+ let html='RESEARCH BUDGET · <b>'+b.u+' / '+b.n+'</b> used <span class="bbar"><i style="width:'+pct+'%"></i></span>';
+ if(b.u>=b.n)html+=' · LIMIT REACHED';
+ if(rt)html+=' · AI refreshes <b>'+rt+' IST</b>'+(left?' (in '+left+')':'');
+ el.innerHTML=html;}
+async function loadUsage(){try{const d=await api('/api/usage');BUDGET={u:d.used,n:d.limit,resetAt:d.resets_at,resetTs:Date.now()+(d.resets_in_seconds||0)*1000};renderBudget();}catch(e){}}
 </script></body></html>

@@ -19,9 +19,18 @@ app = FastAPI(title="AppSec Radar API")
 app.add_middleware(CORSMiddleware, allow_origins=["*"], allow_methods=["*"], allow_headers=["*"])
 
 APP_TZ = ZoneInfo(os.getenv("APP_TZ", "Asia/Kolkata"))  # all app timestamps in IST
+# Gemini free-tier daily quota resets at Pacific midnight (DST-aware via zoneinfo).
+QUOTA_TZ = ZoneInfo(os.getenv("QUOTA_TZ", "America/Los_Angeles"))
 
 def _today() -> str:
     return datetime.datetime.now(APP_TZ).date().isoformat()
+
+def _quota_day() -> str:
+    return datetime.datetime.now(QUOTA_TZ).date().isoformat()
+
+def _next_quota_reset() -> datetime.datetime:
+    now = datetime.datetime.now(QUOTA_TZ)
+    return (now + datetime.timedelta(days=1)).replace(hour=0, minute=0, second=0, microsecond=0)
 
 
 def auth(token: str | None):
@@ -79,11 +88,11 @@ def research(req: ResearchRequest, x_api_token: str | None = Header(None)):
     cached = store.find_briefing(req.feed, req.kind, req.topic)
     if cached:
         return {"id": cached["id"], "cached": True, "content_md": cached["content_md"]}
-    today = _today()
+    today = _quota_day()
     if store.bump_ondemand(today) > config.ONDEMAND_DAILY_LIMIT:
         store.dec_ondemand(today)  # don't count the blocked attempt
         raise HTTPException(429, "Daily research budget reached — cached briefings remain available. "
-                                 "Resets at midnight IST.")
+                                 "See the budget indicator for when it resets.")
     # For custom topics we have no pre-fetched sources; use recent ingest as context
     raw = ingest.ingest(req.feed)
     context = "\n".join(f"- {i['title']} | {i['summary']} | {i['url']}" for i in raw[:40])
@@ -103,9 +112,12 @@ def research(req: ResearchRequest, x_api_token: str | None = Header(None)):
 
 @app.get("/api/usage")
 def usage(x_api_token: str | None = Header(None)):
-    """Today's shared on-demand research budget — for the in-app indicator."""
+    """Shared on-demand research budget + when the daily AI quota refreshes."""
     auth(x_api_token)
-    return {"used": store.get_ondemand(_today()), "limit": config.ONDEMAND_DAILY_LIMIT}
+    reset = _next_quota_reset()
+    left = int((reset - datetime.datetime.now(QUOTA_TZ)).total_seconds())
+    return {"used": store.get_ondemand(_quota_day()), "limit": config.ONDEMAND_DAILY_LIMIT,
+            "resets_at": reset.isoformat(), "resets_in_seconds": max(0, left)}
 
 
 # ======================= ADMIN =======================
