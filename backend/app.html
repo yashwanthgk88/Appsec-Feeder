@@ -38,16 +38,24 @@ input[type=text],input[type=password]{flex:1;padding:9px;border:1px solid var(--
 .acts button{font-size:10px;font-weight:800;letter-spacing:.08em;padding:7px 10px;cursor:pointer}
 .dive{background:var(--yellow);color:var(--ink);border:2px solid var(--ink)}.pov{background:var(--ink);color:var(--yellow);border:2px solid var(--ink)}
 button:disabled{opacity:.4;cursor:not-allowed;box-shadow:none}
-.brief{background:var(--card);border:1px solid var(--line);border-left:6px solid var(--yellow);margin-bottom:20px}
+.brief{background:var(--card);border:1px solid var(--line);border-left:6px solid var(--yellow);margin-bottom:20px;color:var(--ink)}
 .brief.pov{border-left:6px double var(--ink)}
-.body{padding:6px 18px 18px;font-size:14px;line-height:1.6}
-.body h3{font-family:ui-monospace,Menlo,monospace;font-size:13px;letter-spacing:.1em;text-transform:uppercase;display:flex;gap:8px;align-items:center;margin:20px 0 6px}
-.body h3::before{content:"";width:13px;height:13px;background:var(--yellow);border:2px solid var(--ink)}
-.body table{border-collapse:collapse;width:100%;margin:10px 0;font-size:13px}
-.body th{background:var(--ink);color:var(--yellow);font-family:ui-monospace,monospace;font-size:10px;letter-spacing:.06em;text-align:left;padding:6px 8px}
-.body td{border-top:1px solid var(--soft);padding:6px 8px;vertical-align:top}
-.body code{background:#EFEFE9;border:1px solid var(--soft);padding:0 4px;font-size:.85em}
-.body a{color:var(--ink);text-decoration:underline;text-decoration-color:var(--yellow);text-decoration-thickness:2px;word-break:break-all}
+.body{padding:8px 20px 20px;font-size:14px;line-height:1.62;color:#1f2124}
+.body,.body p,.body li,.body td,.body h4{color:#1f2124}
+.body p{margin:9px 0}
+.body b,.body strong{color:#111;font-weight:700}
+.body h3{font-family:ui-monospace,Menlo,monospace;font-size:12.5px;letter-spacing:.09em;text-transform:uppercase;color:#111;display:flex;gap:9px;align-items:center;margin:24px 0 9px;padding-bottom:7px;border-bottom:1px solid var(--line)}
+.body h3::before{content:"";width:11px;height:11px;background:var(--yellow);border:2px solid var(--ink);flex-shrink:0}
+.body h4{font-size:13.5px;font-weight:800;margin:16px 0 4px}
+.body ul,.body ol{padding-left:20px;margin:8px 0}.body li{margin:4px 0}
+.body table{border-collapse:collapse;width:100%;margin:12px 0;font-size:13px;border:1px solid var(--line)}
+.body th{background:var(--ink);color:var(--yellow);font-family:ui-monospace,monospace;font-size:10px;letter-spacing:.06em;text-align:left;padding:7px 9px}
+.body td{border-top:1px solid var(--soft);padding:7px 9px;vertical-align:top}
+.body tr:nth-child(even) td{background:#FAFAF7}
+.body code{background:#F0F0EA;border:1px solid var(--soft);padding:1px 4px;font-size:.85em;color:#7a1f16;border-radius:3px}
+.body pre{background:#0f1115;color:#e6e6df;padding:13px 15px;overflow-x:auto;font-size:12px;line-height:1.5;border-radius:6px;margin:13px 0;border:1px solid #23262c;-webkit-font-smoothing:auto}
+.body pre code{background:none;border:none;color:inherit;padding:0;border-radius:0}
+.body a{color:#0b4fb3;text-decoration:underline;text-decoration-color:var(--yellow);text-decoration-thickness:2px;word-break:break-all}
 .load{padding:18px;color:var(--gray);font-size:12px;letter-spacing:.08em}
 .load::before{content:"";display:inline-block;width:11px;height:11px;background:var(--yellow);border:2px solid var(--ink);margin-right:10px;animation:p 1s infinite}
 @keyframes p{50%{opacity:.3}}
@@ -151,6 +159,7 @@ function md(t){t=t.replace(/&/g,'&amp;').replace(/</g,'&lt;');const L=t.split('\
  const inline=s=>s.replace(/\*\*([^*]+)\*\*/g,'<b>$1</b>').replace(/`([^`]+)`/g,'<code>$1</code>').replace(/\[([^\]]+)\]\((https?:[^)\s]+)\)/g,'<a href="$2" target="_blank" rel="noreferrer">$1</a>');
  while(i<L.length){const l=L[i];
   if(!l.trim()){i++;continue}
+  if(l.trim().startsWith('```')){i++;let cb=[];while(i<L.length&&!L[i].trim().startsWith('```')){cb.push(L[i]);i++}i++;h+=`<pre>${cb.join('\n')}</pre>`;continue}
   if(l.trim().startsWith('|')&&i+1<L.length&&/^[\s|:-]+$/.test(L[i+1])&&L[i+1].includes('-')){const hd=l.split('|').map(c=>c.trim()).filter(Boolean);i+=2;let rows='';
    while(i<L.length&&L[i].trim().startsWith('|')){const cs=L[i].split('|').map(c=>c.trim());rows+='<tr>'+cs.filter((c,x)=>!(c===''&&(x===0||x===cs.length-1))).map(c=>`<td>${inline(c)}</td>`).join('')+'</tr>';i++}
    h+=`<table><thead><tr>${hd.map(c=>`<th>${inline(c)}</th>`).join('')}</tr></thead><tbody>${rows}</tbody></table>`;continue}
