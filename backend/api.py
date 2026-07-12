@@ -43,6 +43,13 @@ def feed_wire(feed: str, x_api_token: str | None = Header(None)):
     return data
 
 
+@app.get("/api/exploited")
+def exploited(x_api_token: str | None = Header(None)):
+    """Actively-exploited CVEs (CISA KEV) ranked by EPSS — always populated."""
+    auth(x_api_token)
+    return {"items": enrich.exploited_watch(8)}
+
+
 @app.get("/api/briefings/{bid}")
 def briefing(bid: int, x_api_token: str | None = Header(None)):
     auth(x_api_token)
@@ -217,12 +224,14 @@ def admin_pipeline_status(x_admin_token: str | None = Header(None)):
 def healthz():
     return {"ok": True}
 
+_NOCACHE = {"Cache-Control": "no-cache, must-revalidate"}
+
 @app.get("/admin", response_class=HTMLResponse)
 def admin_panel():
     path = os.path.join(os.path.dirname(__file__), "admin.html")
-    return HTMLResponse(open(path).read())
+    return HTMLResponse(open(path).read(), headers=_NOCACHE)
 
 @app.get("/", response_class=HTMLResponse)
 def analyst_app():
     path = os.path.join(os.path.dirname(__file__), "app.html")
-    return HTMLResponse(open(path).read())
+    return HTMLResponse(open(path).read(), headers=_NOCACHE)

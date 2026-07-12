@@ -72,6 +72,29 @@ def epss_scores(cves: list[str]) -> dict:
     return out
 
 
+def exploited_watch(limit: int = 8) -> list[dict]:
+    """Recent CISA KEV CVEs (actively exploited), ranked by EPSS. Always populated."""
+    import ingest
+    kev = ingest.fetch_cisa_kev(limit=30)
+    cves = [extract_cves(k["title"])[0] for k in kev if extract_cves(k["title"])]
+    scores = epss_scores(cves) if cves else {}
+    out = []
+    for k in kev:
+        cs = extract_cves(k["title"])
+        if not cs:
+            continue
+        cve = cs[0]
+        s = scores.get(cve)
+        name = k["title"].split(" — ", 1)[1] if " — " in k["title"] else k["title"]
+        out.append({
+            "cve": cve, "name": name, "url": k["url"], "added": k.get("published", ""),
+            "epss": round(s["epss"] * 100, 1) if s else None,
+            "epss_pct": round(s["pct"] * 100) if s else None,
+        })
+    out.sort(key=lambda x: (x["epss"] if x["epss"] is not None else -1), reverse=True)
+    return out[:limit]
+
+
 def enrich_items(items: list[dict]) -> None:
     """In place: attach exploited/cve/epss/epss_pct from each item's own text."""
     if not items:
