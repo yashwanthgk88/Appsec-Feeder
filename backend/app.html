@@ -162,7 +162,7 @@ function md(t){t=t.replace(/&/g,'&amp;').replace(/</g,'&lt;');const L=t.split('\
   h+=`<p>${inline(p.join(' '))}</p>`}
  return h}
 async function loadIndex(){$('blurb').textContent=BLURBS[FEED];$('idxTitle').textContent=`TOP 10 // ${FEED.toUpperCase()} INDEX`;$('idxBody').innerHTML='<div class="load mono">LOADING INDEX</div>';
- try{const d=await api(`/api/feeds/${FEED}/index`);const dt=new Date(d.generated_at*1000).toLocaleString();
+ try{const d=await api(`/api/feeds/${FEED}/index`);const dt=new Date(d.generated_at*1000).toLocaleString('en-IN',{timeZone:'Asia/Kolkata',dateStyle:'medium',timeStyle:'short'})+' IST';
   $('idxBody').innerHTML=d.items.map((it,x)=>`<div class="rowi"><span class="rank mono ${x<3?'top':''}">${String(x+1).padStart(2,'0')}</span>
    <div style="flex:1;min-width:0"><div><b style="font-size:13px">${it.title}</b> <span class="chip mono ${it.severity}">${it.severity||''}</span>${it.exploited?'<span class="chip mono kev" title="On CISA KEV — actively exploited in the wild"> ⚡ KEV</span>':''}${it.epss!=null?`<span class="chip mono epss ${it.epss>=10?'hi':it.epss>=1?'mid':''}" title="EPSS ${it.epss}% — predicted exploitation within 30 days (${it.epss_pct}th percentile)${it.cve?' · '+it.cve:''} · FIRST.org"> EPSS ${it.epss}%</span>`:''}
    <span class="meta mono"> ${[it.org,it.date,it.category].filter(Boolean).join(' · ').toUpperCase()}</span></div>

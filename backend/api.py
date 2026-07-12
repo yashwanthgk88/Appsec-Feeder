@@ -3,6 +3,8 @@
 In prod put this behind EY SSO / Azure AD; the shared token here is POC-grade.
 """
 import datetime
+import os
+from zoneinfo import ZoneInfo
 from fastapi import FastAPI, HTTPException, Header
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
@@ -186,13 +188,14 @@ def admin_test_email(x_admin_token: str | None = Header(None)):
     except Exception as exc:
         return {"ok": False, "error": f"{type(exc).__name__}: {exc}"}
 
+APP_TZ = ZoneInfo(os.getenv("APP_TZ", "Asia/Kolkata"))  # all app timestamps in IST
 _pipeline_state = {"running": False, "started_at": None, "finished_at": None, "error": None}
 
 
 def _run_pipeline_bg():
     import pipeline
     _pipeline_state.update(running=True,
-                           started_at=datetime.datetime.now(datetime.timezone.utc).isoformat(),
+                           started_at=datetime.datetime.now(APP_TZ).isoformat(),
                            finished_at=None, error=None)
     try:
         pipeline.run()
@@ -200,7 +203,7 @@ def _run_pipeline_bg():
         _pipeline_state["error"] = f"{type(exc).__name__}: {exc}"
     finally:
         _pipeline_state.update(running=False,
-                               finished_at=datetime.datetime.now(datetime.timezone.utc).isoformat())
+                               finished_at=datetime.datetime.now(APP_TZ).isoformat())
 
 
 @app.post("/api/admin/run-pipeline")
