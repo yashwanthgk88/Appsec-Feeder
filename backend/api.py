@@ -18,6 +18,11 @@ import enrich
 app = FastAPI(title="AppSec Radar API")
 app.add_middleware(CORSMiddleware, allow_origins=["*"], allow_methods=["*"], allow_headers=["*"])
 
+APP_TZ = ZoneInfo(os.getenv("APP_TZ", "Asia/Kolkata"))  # all app timestamps in IST
+
+def _today() -> str:
+    return datetime.datetime.now(APP_TZ).date().isoformat()
+
 
 def auth(token: str | None):
     if token != config.API_TOKEN:
@@ -74,9 +79,11 @@ def research(req: ResearchRequest, x_api_token: str | None = Header(None)):
     cached = store.find_briefing(req.feed, req.kind, req.topic)
     if cached:
         return {"id": cached["id"], "cached": True, "content_md": cached["content_md"]}
-    today = datetime.date.today().isoformat()
+    today = _today()
     if store.bump_ondemand(today) > config.ONDEMAND_DAILY_LIMIT:
-        raise HTTPException(429, "Daily on-demand research limit reached — cached briefings remain available")
+        store.dec_ondemand(today)  # don't count the blocked attempt
+        raise HTTPException(429, "Daily research budget reached — cached briefings remain available. "
+                                 "Resets at midnight IST.")
     # For custom topics we have no pre-fetched sources; use recent ingest as context
     raw = ingest.ingest(req.feed)
     context = "\n".join(f"- {i['title']} | {i['summary']} | {i['url']}" for i in raw[:40])
@@ -84,6 +91,7 @@ def research(req: ResearchRequest, x_api_token: str | None = Header(None)):
     try:
         content = fn(req.feed, req.topic, context)
     except Exception as exc:  # degrade gracefully instead of a raw 500
+        store.dec_ondemand(today)  # refund the budget slot on failure
         msg = str(exc)
         if getattr(exc, "status_code", None) == 429 or "429" in msg or "RESOURCE_EXHAUSTED" in msg:
             raise HTTPException(429, "AI quota reached for today — cached briefings still work. "
@@ -91,6 +99,13 @@ def research(req: ResearchRequest, x_api_token: str | None = Header(None)):
         raise HTTPException(502, f"AI generation failed ({type(exc).__name__}). Please retry shortly.")
     bid = store.save_briefing(req.feed, req.kind, req.topic, content)
     return {"id": bid, "cached": False, "content_md": content}
+
+
+@app.get("/api/usage")
+def usage(x_api_token: str | None = Header(None)):
+    """Today's shared on-demand research budget — for the in-app indicator."""
+    auth(x_api_token)
+    return {"used": store.get_ondemand(_today()), "limit": config.ONDEMAND_DAILY_LIMIT}
 
 
 # ======================= ADMIN =======================
@@ -195,7 +210,6 @@ def admin_test_email(x_admin_token: str | None = Header(None)):
     except Exception as exc:
         return {"ok": False, "error": f"{type(exc).__name__}: {exc}"}
 
-APP_TZ = ZoneInfo(os.getenv("APP_TZ", "Asia/Kolkata"))  # all app timestamps in IST
 _pipeline_state = {"running": False, "started_at": None, "finished_at": None, "error": None}
 
 

@@ -60,3 +60,16 @@ def bump_ondemand(day: str) -> int:
         conn.execute("INSERT INTO usage (day, ondemand_count) VALUES (?,0) ON CONFLICT(day) DO NOTHING", (day,))
         conn.execute("UPDATE usage SET ondemand_count = ondemand_count + 1 WHERE day=?", (day,))
         return conn.execute("SELECT ondemand_count FROM usage WHERE day=?", (day,)).fetchone()[0]
+
+
+def get_ondemand(day: str) -> int:
+    """Today's on-demand research count — read only (does not increment)."""
+    with db() as conn:
+        row = conn.execute("SELECT ondemand_count FROM usage WHERE day=?", (day,)).fetchone()
+    return row[0] if row else 0
+
+
+def dec_ondemand(day: str) -> None:
+    """Refund a reserved slot when a generation fails (never below zero)."""
+    with db() as conn:
+        conn.execute("UPDATE usage SET ondemand_count = MAX(0, ondemand_count - 1) WHERE day=?", (day,))
