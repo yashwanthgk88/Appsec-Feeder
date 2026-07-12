@@ -27,6 +27,12 @@ input[type=text],input[type=password]{flex:1;padding:9px;border:1px solid var(--
 .rank{font-size:18px;font-weight:800;color:#B8BAB4;width:30px;flex-shrink:0}.rank.top{color:var(--ink)}
 .chip{font-size:10px;font-weight:700;letter-spacing:.1em;padding:2px 7px;background:var(--soft);border-radius:3px}
 .chip.CRITICAL,.chip.ADOPT,.chip.SIGNAL{background:var(--ink);color:var(--yellow)}.chip.HIGH{background:var(--red);color:#fff}
+.chip.kev{background:var(--red);color:#fff}
+.chip.epss{background:var(--soft);color:var(--ink);font-variant-numeric:tabular-nums;cursor:help}
+.chip.epss.mid{background:#E07A11;color:#fff}.chip.epss.hi{background:#7a1512;color:#fff}
+.legendline{font-size:9.5px;color:var(--gray);letter-spacing:.05em;margin:0 0 12px;display:flex;gap:14px;flex-wrap:wrap}
+.legendline b{color:var(--ink);font-weight:800;letter-spacing:.02em}
+.wtext .epss{background:#EDEDE7;color:var(--ink);font-weight:800;padding:1px 5px;border-radius:2px;font-variant-numeric:tabular-nums}
 .meta{font-size:10px;color:var(--gray);letter-spacing:.06em}
 .acts{display:flex;flex-direction:column;gap:5px;flex-shrink:0}
 .acts button{font-size:10px;font-weight:800;letter-spacing:.08em;padding:7px 10px;cursor:pointer}
@@ -122,6 +128,7 @@ footer{max-width:1040px;margin:0 auto;padding:0 20px 30px;font-size:10px;color:#
 <div class="layout">
 <main>
 <div class="bar"><input type="text" id="topic" placeholder="Research a custom topic…"><button class="btn" onclick="research('dive')">DEEP-DIVE</button><button class="btn" onclick="research('pov')">POV</button></div>
+<div class="legendline mono"><span><b>⚡ KEV</b> actively exploited · CISA</span><span><b>EPSS n%</b> predicted exploitation, next 30d · FIRST.org</span></div>
 <div class="idx"><div class="strip mono"><span id="idxTitle">TOP 10 // INDEX</span><a href="#" onclick="loadIndex();return false">↻ RELOAD</a></div><div id="idxBody"><div class="load mono">LOADING INDEX</div></div></div>
 <div id="briefs"></div>
 </main>
@@ -157,7 +164,7 @@ function md(t){t=t.replace(/&/g,'&amp;').replace(/</g,'&lt;');const L=t.split('\
 async function loadIndex(){$('blurb').textContent=BLURBS[FEED];$('idxTitle').textContent=`TOP 10 // ${FEED.toUpperCase()} INDEX`;$('idxBody').innerHTML='<div class="load mono">LOADING INDEX</div>';
  try{const d=await api(`/api/feeds/${FEED}/index`);const dt=new Date(d.generated_at*1000).toLocaleString();
   $('idxBody').innerHTML=d.items.map((it,x)=>`<div class="rowi"><span class="rank mono ${x<3?'top':''}">${String(x+1).padStart(2,'0')}</span>
-   <div style="flex:1;min-width:0"><div><b style="font-size:13px">${it.title}</b> <span class="chip mono ${it.severity}">${it.severity||''}</span>
+   <div style="flex:1;min-width:0"><div><b style="font-size:13px">${it.title}</b> <span class="chip mono ${it.severity}">${it.severity||''}</span>${it.exploited?'<span class="chip mono kev" title="On CISA KEV — actively exploited in the wild"> ⚡ KEV</span>':''}${it.epss!=null?`<span class="chip mono epss ${it.epss>=10?'hi':it.epss>=1?'mid':''}" title="EPSS ${it.epss}% — predicted exploitation within 30 days (${it.epss_pct}th percentile)${it.cve?' · '+it.cve:''} · FIRST.org"> EPSS ${it.epss}%</span>`:''}
    <span class="meta mono"> ${[it.org,it.date,it.category].filter(Boolean).join(' · ').toUpperCase()}</span></div>
    <div style="font-size:13px;color:#3A3C38">${it.one_liner||''}</div></div>
    <div class="acts mono"><button class="dive" onclick="openBriefing(${it.dive_id??'null'},'dive','${(it.title||'').replace(/'/g,"\\'")}')">DEEP-DIVE ▸</button>
@@ -192,7 +199,7 @@ function wireItemHTML(w,i){
  return `<a class="witem" href="${esc(w.url)}" target="_blank" rel="noreferrer">
   <div class="wthumb"><span class="m">${esc(mono2(w.source))}</span>${img}</div>
   <div class="wtext"><div class="t">${esc(w.title)}</div>
-   <div class="m2 mono">${tag}<span class="src">${esc(w.source)}</span>${t?'<span>'+t+'</span>':''}</div></div></a>`;}
+   <div class="m2 mono">${tag}<span class="src">${esc(w.source)}</span>${w.epss!=null?'<span class="epss">EPSS '+w.epss+'%</span>':''}${t?'<span>'+t+'</span>':''}</div></div></a>`;}
 function tickerItemHTML(w){return `<span class="it">${w.exploited?'<span class="ex">EXPLOITED</span>':''}<span class="s">${esc(w.source)}</span>${esc(w.title)}</span>`;}
 function renderWire(){const d=WIRE_DATA;
  if(!d||!d.items||!d.items.length){$('ticker').style.display='none';$('rail').style.display='none';return;}

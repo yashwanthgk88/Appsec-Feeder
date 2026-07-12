@@ -11,6 +11,7 @@ import config
 import store
 import analyze
 import ingest
+import enrich
 
 app = FastAPI(title="AppSec Radar API")
 app.add_middleware(CORSMiddleware, allow_origins=["*"], allow_methods=["*"], allow_headers=["*"])
@@ -27,6 +28,7 @@ def feed_index(feed: str, x_api_token: str | None = Header(None)):
     data = store.get_index(feed)
     if not data:
         raise HTTPException(404, "Index not generated yet — run the pipeline")
+    enrich.enrich_items(data.get("items", []))  # EPSS + KEV, live at read time
     return data
 
 
@@ -36,7 +38,9 @@ def feed_wire(feed: str, x_api_token: str | None = Header(None)):
     auth(x_api_token)
     if feed not in ("breach", "tools", "ai"):
         raise HTTPException(404, "Unknown feed")
-    return ingest.wire(feed)
+    data = ingest.wire(feed)
+    enrich.enrich_items(data.get("items", []))
+    return data
 
 
 @app.get("/api/briefings/{bid}")
