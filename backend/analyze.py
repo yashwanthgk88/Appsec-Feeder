@@ -22,8 +22,14 @@ def _with_retries(call):
         try:
             return call()
         except Exception as exc:
-            status = getattr(exc, "status_code", None)
-            if status != 429 and "429" not in str(exc) and "RESOURCE_EXHAUSTED" not in str(exc):
+            s = str(exc)
+            is_429 = getattr(exc, "status_code", None) == 429 or "429" in s or "RESOURCE_EXHAUSTED" in s
+            if not is_429:
+                raise
+            # A per-DAY quota cap won't recover within this request — fail fast
+            # instead of burning ~5 min of backoff. Only per-minute limits retry.
+            if "PerDay" in s or "GenerateRequestsPerDay" in s:
+                print("[analyze] daily quota exhausted — failing fast")
                 raise
             if attempt == _MAX_RETRIES - 1:
                 raise
