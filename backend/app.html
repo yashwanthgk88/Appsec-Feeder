@@ -22,6 +22,9 @@ input[type=text],input[type=password]{flex:1;padding:9px;border:1px solid var(--
 .idx{background:var(--card);border:1px solid var(--line);margin-bottom:22px;border-radius:8px;overflow:hidden;box-shadow:0 6px 22px -15px rgba(20,20,20,.45)}
 .strip{background:linear-gradient(180deg,#202020,#141414);color:var(--yellow);display:flex;justify-content:space-between;padding:10px 14px;font-size:11px;letter-spacing:.14em;border-bottom:2px solid var(--yellow)}
 .strip a{color:var(--yellow)}
+.strip .stripr{display:flex;align-items:center;gap:12px}
+.strip .exp a{color:var(--yellow);cursor:pointer;text-decoration:underline;text-decoration-thickness:1px;letter-spacing:.05em}
+.strip .exp a:hover{color:#fff}
 .rowi{display:flex;gap:12px;padding:12px 14px;border-top:1px solid var(--soft);align-items:flex-start;transition:background .13s}
 .rowi:hover{background:linear-gradient(90deg,#FFFCEC,#fff)}
 .rank{font-size:18px;font-weight:800;color:#B8BAB4;width:30px;flex-shrink:0}.rank.top{color:var(--ink)}
@@ -186,15 +189,25 @@ async function openBriefing(id,kind,title){
  if(BUSY)return;                         // block new generations until the current one finishes
  setBusy(true);
  const box=document.createElement('div');box.className='brief '+kind;
- box.innerHTML=`<div class="strip mono"><span>${kind==='pov'?'★ POV':'BRIEFING'} // ${title.toUpperCase().slice(0,60)}</span><a href="#" onclick="this.closest('.brief').remove();return false">✕ CLOSE</a></div><div class="body"><div class="load mono">${id?'LOADING FROM CACHE':'RESEARCHING — NOT CACHED, THIS TAKES A MINUTE'}</div></div>`;
+ box.innerHTML=`<div class="strip mono"><span>${kind==='pov'?'★ POV':'BRIEFING'} // ${title.toUpperCase().slice(0,60)}</span><span class="stripr"><span class="exp" style="display:none">⬇ <a data-x="word">WORD</a> · <a data-x="pdf">PDF</a> · <a data-x="xml">XML</a></span><a href="#" onclick="this.closest('.brief').remove();return false">✕ CLOSE</a></span></div><div class="body"><div class="load mono">${id?'LOADING FROM CACHE':'RESEARCHING — NOT CACHED, THIS TAKES A MINUTE'}</div></div>`;
  $('briefs').prepend(box);const body=box.querySelector('.body');
  box.scrollIntoView({behavior:'smooth',block:'start'});   // take the user down to the briefing
  try{let content;if(id){const b=await api(`/api/briefings/${id}`);content=b.content_md}
   else{const r=await api(`/api/research`,{method:'POST',body:JSON.stringify({feed:FEED,topic:title,kind})});content=r.content_md}
-  body.innerHTML=md(content)}
- catch(e){body.innerHTML=`<div class="err">Failed (${e.message==='429'?'daily on-demand limit reached':e.message}).</div>`}
+  body.innerHTML=md(content);box._md=content;box._title=title;box._kind=kind;box.querySelector('.exp').style.display='inline'}
+ catch(e){const m=e.message==='429'?'AI quota reached for today — cached briefings still work':e.message==='502'?'AI generation failed, please retry shortly':e.message;body.innerHTML=`<div class="err">Failed (${m}).</div>`}
  finally{setBusy(false)}}
 async function research(kind){if(BUSY)return;const t=$('topic').value.trim();if(!t)return;$('topic').value='';openBriefing(null,kind,t)}
+
+/* ---- export POV / deep-dive to Word / PDF / XML (all client-side, no server) ---- */
+function _slug(s){return (s||'briefing').toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-+|-+$/g,'').slice(0,60)||'briefing';}
+function _dl(blob,name){const u=URL.createObjectURL(blob);const a=document.createElement('a');a.href=u;a.download=name;document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(u),2000);}
+const _EXPCSS="body{font-family:Calibri,Segoe UI,Arial,sans-serif;color:#1f2124;font-size:11pt;line-height:1.5;max-width:820px;margin:24px auto;padding:0 20px}h1{color:#141414;font-size:20pt}h3{font-family:Consolas,monospace;text-transform:uppercase;font-size:11pt;border-bottom:1px solid #ccc;padding-bottom:4px;margin-top:20px}h4{font-size:12pt}table{border-collapse:collapse;width:100%}th{background:#141414;color:#FFE600;padding:6px;text-align:left;font-size:9pt}td{border:1px solid #ddd;padding:6px}pre{background:#0f1115;color:#e6e6df;padding:10px;font-family:Consolas,monospace;font-size:9pt;white-space:pre-wrap;word-break:break-word}code{background:#f0f0ea}a{color:#0b4fb3}";
+function _docHTML(title,bodyHTML){return `<html xmlns:o='urn:schemas-microsoft-com:office:office' xmlns:w='urn:schemas-microsoft-com:office:word' xmlns='http://www.w3.org/TR/REC-html40'><head><meta charset='utf-8'><style>${_EXPCSS}</style></head><body><h1>${esc(title)}</h1><p style='color:#888;font-size:9pt'>AppSec Radar · AI-generated — verify before client use · ${new Date().toLocaleDateString('en-IN',{timeZone:'Asia/Kolkata'})}</p>${bodyHTML}</body></html>`;}
+function exportWord(title,bodyHTML){_dl(new Blob(['﻿'+_docHTML(title,bodyHTML)],{type:'application/msword'}),_slug(title)+'.doc');}
+function exportPDF(title,bodyHTML){const w=window.open('','_blank');if(!w){alert('Allow pop-ups to export as PDF.');return;}w.document.write(`<html><head><meta charset='utf-8'><title>${esc(title)}</title><style>${_EXPCSS}@media print{body{margin:0}}</style></head><body><h1>${esc(title)}</h1><p style='color:#888;font-size:10px'>AppSec Radar · AI-generated — verify before client use</p>${bodyHTML}</body></html>`);w.document.close();setTimeout(()=>{try{w.focus();w.print();}catch(e){}},400);}
+function exportXML(title,mdText,kind){const safe=(mdText||'').replace(/]]>/g,']]]]><![CDATA[>');const x=`<?xml version="1.0" encoding="UTF-8"?>\n<briefing kind="${esc(kind||'')}" generated="${new Date().toISOString()}" tool="AppSec Radar">\n  <title>${esc(title)}</title>\n  <disclaimer>AI-generated from public sources — verify before client use.</disclaimer>\n  <content format="markdown"><![CDATA[\n${safe}\n]]></content>\n</briefing>\n`;_dl(new Blob([x],{type:'application/xml'}),_slug(title)+'.xml');}
+$('briefs').addEventListener('click',e=>{const a=e.target.closest('.exp a[data-x]');if(!a)return;e.preventDefault();const box=a.closest('.brief');if(!box||!box._title)return;const bodyHTML=box.querySelector('.body').innerHTML;const f=a.dataset.x;if(f==='word')exportWord(box._title,bodyHTML);else if(f==='pdf')exportPDF(box._title,bodyHTML);else exportXML(box._title,box._md,box._kind);});
 
 /* ---- live wire + latest rail (real RSS/KEV per feed, no AI) ---- */
 let WIRE_DATA=null,WIRE_VIEW='list',WIRE_TIMERS=false;

@@ -81,7 +81,14 @@ def research(req: ResearchRequest, x_api_token: str | None = Header(None)):
     raw = ingest.ingest(req.feed)
     context = "\n".join(f"- {i['title']} | {i['summary']} | {i['url']}" for i in raw[:40])
     fn = analyze.pov if req.kind == "pov" else analyze.deep_dive
-    content = fn(req.feed, req.topic, context)
+    try:
+        content = fn(req.feed, req.topic, context)
+    except Exception as exc:  # degrade gracefully instead of a raw 500
+        msg = str(exc)
+        if getattr(exc, "status_code", None) == 429 or "429" in msg or "RESOURCE_EXHAUSTED" in msg:
+            raise HTTPException(429, "AI quota reached for today — cached briefings still work. "
+                                     "New generation resumes after the provider quota resets, or enable billing.")
+        raise HTTPException(502, f"AI generation failed ({type(exc).__name__}). Please retry shortly.")
     bid = store.save_briefing(req.feed, req.kind, req.topic, content)
     return {"id": bid, "cached": False, "content_md": content}
 
