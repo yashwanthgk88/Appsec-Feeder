@@ -182,6 +182,7 @@ def wire(feed_key: str, limit: int = 12) -> dict:
                     "ts": calendar.timegm(pp) if pp else 0,
                     "exploited": False,
                     "image": _entry_image(e),
+                    "summary": (e.get("summary", "") or "")[:300],
                 })
         except Exception as exc:  # a dead feed must never break the wire
             print(f"[wire] RSS failed {url}: {exc}")
@@ -199,9 +200,14 @@ def wire(feed_key: str, limit: int = 12) -> dict:
                           "ts": ts, "exploited": True, "image": ""})
         sources.append("CISA KEV")
 
-    # Newest first, deduped, and capped per source so no single feed dominates.
+    # Breach leads with the most recent CISA KEV (actively-exploited, CVE-bearing)
+    # items, then newest others. Dedupe + cap per source so none dominates.
+    kev_first = sorted([i for i in items if i["source"] == "CISA KEV"],
+                       key=lambda x: x["ts"], reverse=True)[:3] if feed_key == "breach" else []
+    kev_ids = {id(i) for i in kev_first}
+    rest = sorted([i for i in items if id(i) not in kev_ids], key=lambda x: x["ts"], reverse=True)
     seen, per, out = set(), {}, []
-    for it in sorted(items, key=lambda x: x["ts"], reverse=True):
+    for it in kev_first + rest:
         k = it["title"].lower()[:80]
         if not k or k in seen:
             continue

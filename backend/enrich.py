@@ -79,7 +79,8 @@ def enrich_items(items: list[dict]) -> None:
     kev = kev_set()
     all_cves: list[str] = []
     for it in items:
-        c = extract_cves(it.get("title", ""), it.get("category", ""), it.get("one_liner", ""))
+        c = extract_cves(it.get("title", ""), it.get("category", ""),
+                         it.get("one_liner", ""), it.get("summary", ""))
         it["_cves"] = c
         all_cves.extend(c)
     scores = epss_scores(list(dict.fromkeys(all_cves))) if all_cves else {}
